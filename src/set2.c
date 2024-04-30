@@ -213,7 +213,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
       // peek the next elm in se
       nel = set_peek(se);
 
-      // one more caan be added?
+      // one more can be added?
       if (add > 0) {
       
          // go through all elements
@@ -227,7 +227,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
          }
       }
     
-      // no more links?
+      // more links?
       if (li != NULL) {
 
          if (li->key == nel) {
@@ -239,7 +239,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
 	    set_pop(sp);
 	    set_unread(se, 1);
 
-         } else {
+         }
 
 	 if (skp > 0) {
 
@@ -256,7 +256,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
                set_unread(se, cnl);
 	    }
 	    return;
-	 }}
+	 }
       }
    }
    return;
