@@ -446,7 +446,7 @@ boolean set_tl_similar( set *sp, set *se, int skp, int add )
    if (set_eos(sp)) {
     
       // true only if remaining elems from se can be skipped
-     rtval = skp >= set_tl_length(se);
+      rtval = skp >= set_tl_length(se);
 
       // restore cursors
       sp->cursor = csp;

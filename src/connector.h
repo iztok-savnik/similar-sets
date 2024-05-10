@@ -41,6 +41,7 @@ extern boolean con_member( connector *sp, int key );
 extern link*   con_lookup( connector *sp, int key );
 extern boolean con_open( connector* sp );
 extern boolean con_open_at( connector* sp, int key );
+extern link*   con_peek( connector *sp );
 extern link*   con_read( connector *sp );
 extern boolean con_eos( connector *sp );
 extern boolean con_write( connector *sp, int key, set2_node* val );

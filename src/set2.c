@@ -171,7 +171,7 @@ void set2_insert( set2_node *st, set *se )
   Search in set-trie st the sets that are similar to the set se. The
   current path from root to active node is stored in the set sp. 
  */
-void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
+void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 {
    int nel = 0;           // next element
    int cnl = 0;           // count delete operations
@@ -182,7 +182,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
 
       // sp is similar to se if length of se's tail is less than or
       // equal to number of skipped elements in se.
-      if (set_tl_length(se) <= skp) {
+      if (set_tl_length(se) <= *skp) {
 
          set_print(stdout, sp);
 	 fprintf(stdout, " ");
@@ -194,7 +194,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
    // are we in a tail?
    if (st->istail) {
      
-      if (set_tl_similar(st->sub.tail, se, skp, add)) {
+      if (set_tl_similar(st->sub.tail, se, *skp, *add)) {
 
          // left for testing. should be the same as st->sub.tail
          set_print(stdout, sp);
@@ -208,56 +208,156 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int skp, int add )
    // open access to links
    con_open(st->sub.link);
 
-   while (!con_eos(st->sub.link)) {
+   while (!set_eos(se) && !con_eos(st->sub.link)) {
 
-      // peek the next elm in se
-      nel = set_peek(se);
+      // peek heads of both sets
+      nel = set_peek(se);   // peek the next elm in se
+      li  = con_peek(st->sub.link); // peek the next link li
 
-      // one more can be added?
-      if (add > 0) {
+      if (nel > li->key) {
+	
+        // nothing more to skip in se if nel=-1!
+	// one more can be added?
+         if (*add > 0) {
       
-         // go through all elements
-         for (li = con_read(st->sub.link);
-	      (li != NULL) && ((li->key < nel) || (nel == -1));
-	      li = con_read(st->sub.link)) {
+            // add elem from link, search in sub-tree then get next one
+	    do {
+ 	       con_read(st->sub.link);
 
-            set_push(sp, li->key);
-            set2_simsearch(li->val, se, sp, skp, add-1);
-            set_pop(sp);
+	       // descend only with li->key
+	       set_push(sp, li->key);
+	       (*add)--;
+               set2_simsearch(li->val, se, sp, skp, add);
+	       (*add)++;
+               set_pop(sp);
+
+               // check next link in connector
+	       li = con_peek(st->sub.link);
+	    
+	    } while ((li != NULL) && (nel > li->key));
+
+            continue;
+	    
+	 } else {
+
+            // (nel > li->key) && (add = 0) ==> try to descend in
+            // se with (skip) nel only, if skp > 0 is true.
+     	    // for now just read from the connector a link at the
+	    // position nel.
+            con_open_at(st->sub.link, nel);
+            li = con_peek(st->sub.link);
+
+            continue;
          }
-      }
-    
-      // more links?
-      if (li != NULL) {
 
-         if (li->key == nel) {
+      } else if (nel == li->key) {
 
-            // descend in both, se and st 
-	    set_read(se);
-            set_push(sp, nel);
-	    set2_simsearch(li->val, se ,sp, skp, add);
-	    set_pop(sp);
-	    set_unread(se, 1);
+ 	 // link and se are valid; no need to check.
+	 // descend in both, se and st.
+	 nel = set_read(se);
+         set_push(sp, nel);
+         set2_simsearch(li->val, se ,sp, skp, add);
+	 set_pop(sp);
+	 set_unread(se, 1);
 
-         }
+	 // descend also in tree set with li->key
+         li  = con_read(st->sub.link); 
 
-	 if (skp > 0) {
+	 // if possible skip element from se
+	 if (*skp > 0) {
 
  	    // descend only in se, ie., skip one in se, or delete one
 	    // in se.  note: we delete nel from the solution.
 	    // advancement to next elements possible ONLY while skp>0.
-	    nel = set_read(se);
+	    set_read(se);
+            // st-sub.link is already at the next position. by using
+	    // the same link (used to descend) we come to the same
+	    // situation as with "equality" descent, with one add and
+	    // one skip. no need for another con_read.
  	    cnl++;
-	    skp--;
+	    (*skp)--;
+            continue;
+	    
 	 } else {
 
-	    // return back cursor in se
+	    // can not skip nel so no more adding is possible in the
+	    // given position.
+
+	    // restore cursor in se (skips) to the position when
+	    // function entered. restore the state of skp to the same
+	    // position.
             if (cnl > 0) {
+               *skp += cnl;
                set_unread(se, cnl);
-	    }
+            }
+	    return;
+	 }
+	 
+      } else /* nel < li->key */ {
+	
+	 // if possible skip element from se
+	 if (*skp > 0) {
+
+ 	    // descend only in se, ie., skip one in se, or delete one
+	    // in se. note: we delete nel from the solution.
+	    // advancement to next elements possible only if skp>0.
+	    set_read(se);
+ 	    cnl++;
+	    (*skp)--;
+            continue;
+	    
+         } else {
+	   
+	    // skp = 0 and therefore nel can not be skipped. otherwise
+	    // the selected set is not similar any more with se.
+	    // therefore we can not add more elements from a tree set.
+
+            // restore cursor in se and update skp accordingly.
+            if (cnl > 0) {
+               *skp += cnl;
+               set_unread(se, cnl);
+            }
 	    return;
 	 }
       }
+      
+   } // while
+
+   // if (set_eos(se) && con_eos(st->sub.link)) {
+         // nothing more to do in this node. 
+   // } else if (con_eos(st->sub.link)) /* && !set_eos(se) */ { 
+         // can skip remaining elms from se if skp >=
+         // set_tl_lnegth(se). and if st->isset is true then sp is the
+         // result. this is the same situation as when st->isset is true
+         // at the beginning of this function.
+   // } else /* set_eos(se) && !con_eos(st->sub.link) */ {
+
+   if (set_eos(se) && !con_eos(st->sub.link)) {
+
+      if (*add > 0) {
+      
+         // add elem from link, search in sub-tree then get next one
+	 do {
+ 	    li = con_read(st->sub.link);
+
+	    // descend only with li->key
+	    set_push(sp, li->key);
+	    (*add)--;
+            set2_simsearch(li->val, se, sp, skp, add);
+	    (*add)++;
+            set_pop(sp);
+
+	    // check next link in connector
+	    li = con_peek(st->sub.link);
+	    
+	 } while (li != NULL);
+      }
+   }
+
+   // restore cursor in se and update skp accordingly.
+   if (cnl > 0) {
+      *skp += cnl;
+      set_unread(se, cnl);
    }
    return;
    

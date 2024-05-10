@@ -21,45 +21,6 @@
 
 int main( int argc, char *argv[] )
 {  
-   printf("-------Creating set s1.\n");
-   set *s1 = set_alloc(10);
-
-   printf("-------Creating set s2.\n");
-   set *s2 = set_alloc(10);
-
-   int a1[] = {3,4,5,6,8,9,10,14,15,18};
-   int a2[] = {2,3,5,8,9,10,11,14,16,18,19};
-   
-   printf("-------Inserting elms in s1.\n");
-   int n = sizeof(a1)/sizeof(a1[0]);
-   for (int i=0; i < n; i++) {
-       set_write(s1, a1[i]);
-   }
-
-   printf("-------Inserting elms in s2.\n");
-   n = sizeof(a2)/sizeof(a2[0]);
-   for (int i=0; i < n; i++) {
-       set_write(s2, a2[i]);
-   }
-   
-   printf("-------Printing s1 and s2.\n");
-   set_print(stdout, s1); printf("\n");
-   set_print(stdout, s2); printf("\n");
-
-   printf("-------Check if s1 similar to s2.\n");
-   if (set_tl_similar(s2,s1,3,3)) {
-      printf("s1 similar to s2\n");
-   } else {
-      printf("s1 not similar to s2\n");
-   }   
-}
-
-
-
-
-
-void previous_tests() {
-
    printf("-------Creating set.\n");
    set *sp = set_alloc(10);
 
@@ -103,24 +64,91 @@ void previous_tests() {
    }
    printf("Set size=%d.\n", set_size(sp));
 
-   d = 99962;
-   printf("-------Printing set from element %d to the end of sequence.\n", d);
-   set_open_at(sp, d);
+   printf("-------Printing set.\n");
+   set_open(sp);
    while ((iv = set_read(sp)) != -1)
       printf("element=%d\n", iv);
 
    printf("-------Sorting set.\n");
    set_sort(sp);
 
-   d = 98955;
-   printf("-------Printing set from element %d to the end of sequence.\n", d);
+   i = 100;
+   d = 61;
+   printf("-------Printing 100 set elms from element %d to the end of sequence.\n", d);
    set_open_at(sp, d);
-   while ((iv = set_read(sp)) != -1)
+   while (((iv = set_read(sp)) != -1) && (i-- > 0))
+      printf("element=%d\n", iv);
+
+   i = 100;
+   d = 2140;
+   printf("-------Printing 100 set elms from element %d.\n", d);
+   set_open_at(sp, d);
+   while (((iv = set_read(sp)) != -1) && (i-- > 0))
+      printf("element=%d\n", iv);
+
+   i = 100;
+   d = 32456;
+   printf("-------Printing 100 set elms from element %d.\n", d);
+   set_open_at(sp, d);
+   while (((iv = set_read(sp)) != -1) && (i-- > 0))
+      printf("element=%d\n", iv);
+
+   i = 100;
+   d = 30165;
+   printf("-------Printing 100 set elms from element %d.\n", d);
+   set_open_at(sp, d);
+   while (((iv = set_read(sp)) != -1) && (i-- > 0))
+      printf("element=%d\n", iv);
+
+   i = 100;
+   d = 98955;
+   printf("-------Printing 100 set elms from element %d.\n", d);
+   set_open_at(sp, d);
+   while (((iv = set_read(sp)) != -1) && (i-- > 0))
       printf("element=%d\n", iv);
 
    printf("-------Freeing set.\n");
    set_free(sp);
-  
-} /*main*/
+}
+
+
+
+
+
+
+void previous_tests()
+{
+   printf("-------Creating set s1.\n");
+   set *s1 = set_alloc(10);
+
+   printf("-------Creating set s2.\n");
+   set *s2 = set_alloc(10);
+
+   int a1[] = {3,4,5,6,8,9,10,14,15,18};
+   int a2[] = {2,3,5,8,9,10,11,14,16,18,19};
+   
+   printf("-------Inserting elms in s1.\n");
+   int n = sizeof(a1)/sizeof(a1[0]);
+   for (int i=0; i < n; i++) {
+       set_write(s1, a1[i]);
+   }
+
+   printf("-------Inserting elms in s2.\n");
+   n = sizeof(a2)/sizeof(a2[0]);
+   for (int i=0; i < n; i++) {
+       set_write(s2, a2[i]);
+   }
+   
+   printf("-------Printing s1 and s2.\n");
+   set_print(stdout, s1); printf("\n");
+   set_print(stdout, s2); printf("\n");
+
+   printf("-------Check if s1 similar to s2.\n");
+   if (set_tl_similar(s2,s1,3,3)) {
+      printf("s1 similar to s2\n");
+   } else {
+      printf("s1 not similar to s2\n");
+   }   
+}
 
 

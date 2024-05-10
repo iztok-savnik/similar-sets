@@ -192,6 +192,18 @@ boolean con_open_at(connector *sp, int key)
 } /*con_open_at*/
 
 /*
+  Peek the next reference to set2_node using cursor position.
+  Cursor is not changed.
+ */
+link* con_peek(connector* sp)
+{
+   if (sp->cursor >= sp->last)
+      return NULL;
+   else 
+      return &(sp->seq[(sp->cursor)+1]);
+} /*con_peek*/
+
+/*
   Read the next reference to set2_node using cursor position.
  */
 link* con_read(connector* sp)
@@ -202,7 +214,7 @@ link* con_read(connector* sp)
       return &(sp->seq[++(sp->cursor)]);
 } /*con_read*/
 
-  /*
+/*
   Test if current index of a sequence is at the end of sequence.
  */
 boolean con_eos(connector *sp)
