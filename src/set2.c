@@ -185,9 +185,16 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
       if (set_tl_length(se) <= *skp) {
 
          set_print(stdout, sp);
-	 fprintf(stdout, " ");
-         set_tl_print(stdout, se);
+	 //fprintf(stdout, " ");
+         //set_tl_print(stdout, se);  // bug!
 	 fprintf(stdout, "\n");
+      }
+
+      // return if connector was not created
+      if (st->sub.link == NULL) {
+
+	 // nothing else to do
+	 return;
       }
    }
 

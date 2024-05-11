@@ -37,6 +37,7 @@ int main( int argc, char *argv[] )
 
    //int a1[] = {3,4,5,6,8,9,10,14,15,18};
    int a1[] = {0,1,4,5,6};
+   //int a1[] = {1,4,8};
    
    printf("-------Inserting elms in s1.\n");
    int n = sizeof(a1)/sizeof(a1[0]);
@@ -50,15 +51,11 @@ int main( int argc, char *argv[] )
    printf("-------Creating set sp.\n");
    set *sp = set_alloc(10);
 
-   int add = 2;
-   int skp = 2;
+   int add = 1;
+   int skp = 1;
 
    printf("-------Find in st sets similar to s1.\n");
    set2_simsearch(st, s1, sp, &skp, &add);
    
-   //   printf("-------Writting a dataset from a set-trie.\n");
-   set2_store(stdout, st);
-   fclose(infile);
-
 } /*main*/
 
