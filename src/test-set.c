@@ -19,7 +19,49 @@
 /*-------------------------- MAIN program ----------------------------------
  */
 
+
 int main( int argc, char *argv[] )
+{
+   printf("-------Creating set s1.\n");
+   set *s1 = set_alloc(10);
+
+   printf("-------Creating set s2.\n");
+   set *s2 = set_alloc(10);
+
+   int a1[] = {3,4,5,6,8,9,10,14,15,18};
+   int a2[] = {3,4,5,8,9,10,14,16,19,21};
+   
+   printf("-------Inserting elms in s1.\n");
+   int n = sizeof(a1)/sizeof(a1[0]);
+   for (int i=0; i < n; i++) {
+       set_write(s1, a1[i]);
+   }
+
+   printf("-------Inserting elms in s2.\n");
+   n = sizeof(a2)/sizeof(a2[0]);
+   for (int i=0; i < n; i++) {
+       set_write(s2, a2[i]);
+   }
+   
+   printf("-------Printing s1 and s2.\n");
+   set_print(stdout, s1); printf("\n");
+   set_print(stdout, s2); printf("\n");
+
+   printf("-------Check if s1 similar to s2.\n");
+   int skp = 3;
+   int add = 3;
+   printf("skp=%d,add=%d\n", skp, add);
+   if (set_tl_similar(s1, s2, &skp, &add)) {
+      printf("s1 similar to s2\n");
+   } else {
+      printf("s1 not similar to s2\n");
+   }
+   printf("skp=%d,add=%d\n", skp, add);
+}
+
+
+
+void previous_tests()
 {  
    printf("-------Creating set.\n");
    set *sp = set_alloc(10);
@@ -113,42 +155,5 @@ int main( int argc, char *argv[] )
 
 
 
-
-
-
-void previous_tests()
-{
-   printf("-------Creating set s1.\n");
-   set *s1 = set_alloc(10);
-
-   printf("-------Creating set s2.\n");
-   set *s2 = set_alloc(10);
-
-   int a1[] = {3,4,5,6,8,9,10,14,15,18};
-   int a2[] = {2,3,5,8,9,10,11,14,16,18,19};
-   
-   printf("-------Inserting elms in s1.\n");
-   int n = sizeof(a1)/sizeof(a1[0]);
-   for (int i=0; i < n; i++) {
-       set_write(s1, a1[i]);
-   }
-
-   printf("-------Inserting elms in s2.\n");
-   n = sizeof(a2)/sizeof(a2[0]);
-   for (int i=0; i < n; i++) {
-       set_write(s2, a2[i]);
-   }
-   
-   printf("-------Printing s1 and s2.\n");
-   set_print(stdout, s1); printf("\n");
-   set_print(stdout, s2); printf("\n");
-
-   printf("-------Check if s1 similar to s2.\n");
-   if (set_tl_similar(s2,s1,3,3)) {
-      printf("s1 similar to s2\n");
-   } else {
-      printf("s1 not similar to s2\n");
-   }   
-}
 
 

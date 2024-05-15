@@ -374,7 +374,7 @@ void set_tl_print( FILE *f, set *sp )
   otherwise. After the function completes execution the cursor in both
   sets stays at the same position as before function call.
  */
-boolean set_tl_similar( set *sp, set *se, int skp, int add )
+boolean set_tl_similar( set *sp, set *se, int *skp, int *add )
 {
    // elements from sp and se
    int esp = 0;           // element from sp
@@ -400,9 +400,9 @@ boolean set_tl_similar( set *sp, set *se, int skp, int add )
 	 // add an element to result sp if permitted
  	 if (esp < ese) {
 
-	    if (add > 0) {
+	    if (*add > 0) {
 	       set_read(sp);
-	       add--;
+	       (*add)--;
 	       continue;
 	       
 	    } else {
@@ -416,9 +416,9 @@ boolean set_tl_similar( set *sp, set *se, int skp, int add )
 	 } else {
 
 	    // skip an element from se if still possible
-	    if (skp > 0) {
+	    if (*skp > 0) {
 	       set_read(se);
-	       skp--;
+	       (*skp)--;
 	       continue;
 	       
 	    } else {
@@ -446,7 +446,8 @@ boolean set_tl_similar( set *sp, set *se, int skp, int add )
    if (set_eos(sp)) {
     
       // true only if remaining elems from se can be skipped
-      rtval = skp >= set_tl_length(se);
+      *skp -= set_tl_length(se);
+      rtval = (*skp) >= 0; 
 
       // restore cursors
       sp->cursor = csp;
@@ -456,7 +457,8 @@ boolean set_tl_similar( set *sp, set *se, int skp, int add )
    } else { // set_eos(se) && !set_eos(sp)
 
       // true only if remaining elems from sp can be added
-      rtval = add >= set_tl_length(sp);
+      *add -= set_tl_length(sp);
+      rtval = (*add) >= 0;
       
       // restore cursors
       sp->cursor = csp;

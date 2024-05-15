@@ -182,12 +182,14 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 
       // sp is similar to se if length of se's tail is less than or
       // equal to number of skipped elements in se.
-      if (set_tl_length(se) <= *skp) {
+      int tmp_skp = (*skp) - set_tl_length(se);
+      if (tmp_skp >= 0) {
 
          set_print(stdout, sp);
 	 //fprintf(stdout, " ");
-         //set_tl_print(stdout, se);  // bug!
-	 fprintf(stdout, "\n");
+         //set_tl_print(stdout, se);
+	 fprintf(stdout, " (%d,%d)\n", *add, tmp_skp);
+         //fprintf(stdout, "\n");        
       }
 
       // return if connector was not created
@@ -200,15 +202,25 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 
    // are we in a tail?
    if (st->istail) {
-     
-      if (set_tl_similar(st->sub.tail, se, *skp, *add)) {
+
+      // save skp and add
+      int tmp_skp = *skp;
+      int tmp_add = *add;
+
+      // check if tail in st is similar to the rest of se
+      if (set_tl_similar(st->sub.tail, se, skp, add)) {
 
          // left for testing. should be the same as st->sub.tail
          set_print(stdout, sp);
          fprintf(stdout, " ");
          set_tl_print(stdout, st->sub.tail);
-         fprintf(stdout, "\n");        
+	 fprintf(stdout, " (%d,%d)\n", *add, *skp);
+         //fprintf(stdout, "\n");        
       }
+
+      // restire skp and add
+      *skp = tmp_skp;
+      *add = tmp_add;
       return;
    }
 

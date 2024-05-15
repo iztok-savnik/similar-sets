@@ -49,6 +49,6 @@ extern void    set_print( FILE *f, set *sp );
 
 extern int     set_tl_length( set *sp );
 extern void    set_tl_print( FILE *f, set *sp );
-extern boolean set_tl_similar( set *sp, set *se, int skp, int add );
+extern boolean set_tl_similar( set *sp, set *se, int *skp, int *add );
 
 #endif /* SET_H */
