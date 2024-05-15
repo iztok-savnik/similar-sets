@@ -1,7 +1,8 @@
+# not finished...
 CC = gcc
 LINK = ld
 CFLAGS = -g
-OBJECTS = test-kvs.o kstore.o config.o
+OBJECTS = config.o set.o connector.o set2.o
 SLIBS = 
 PROGRAM = test
 
@@ -11,6 +12,8 @@ $(PROGRAM): 		$(OBJECTS)
 
 config.o:	config.h config.c
 
-kstore.o:	config.h kstore.h kstore.c
+set.o:		config.h set.h set.c
 
-test-kvs.o:	config.h kstore.h test-kvs.c
+connector.o:	config.h set.h set2.h connector.h connector.c
+
+set2.o:		config.h set.h connector.h set2.h set2.c
