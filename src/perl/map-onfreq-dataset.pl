@@ -29,7 +29,7 @@ tie %map, 'BerkeleyDB::Btree',
     #print "freqfn=".$freqfn."\n";
 #}
 
-sub test_map_dataset_onfreq {
+sub map_dataset_onfreq {
 
    # counting sets
    my $i = 0;
@@ -75,7 +75,7 @@ sub test_map_dataset_onfreq {
    }
 }
 
-&test_map_dataset_onfreq;
+&map_dataset_onfreq;
 
 
 
