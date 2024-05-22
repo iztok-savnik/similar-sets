@@ -10,7 +10,7 @@ BEGIN {
 }
 
 tie @ds, 'BerkeleyDB::Recno',
-         -Cachesize => 30000000000,
+         -Cachesize => 5000000000,
          -Filename   => "store.db",
          -Flags      => DB_CREATE;  #|DB_RDONLY;
 

@@ -1,0 +1,19 @@
+How to generate:
+
+1) sorted datasets
+2) frequencies of datatset elements
+3) mappings based on frequencies
+4) datasets mapped on the basis of element frequencies
+5) sorted mapped datasets
+
+[set-similarity]$ ./sort-dataset.pl < dataset.txt > dataset.txt.sorted 
+[set-similarity]$ ./symb-freq.pl < dataset.txt | sort -n -r -k2 > dataset.freq
+[set-similarity]$ ./gen-map-onfreq.pl < dataset.freq > dataset.freq.map
+[set-similarity]$ ./map-onfreq-dataset.pl dataset.freq.map < dataset.txt > dataset.txt.mapd
+[set-similarity]$ ./sort-dataset.pl < dataset.txt.mapd > dataset.txt.mapd.sorted 
+
+
+
+
+
+
