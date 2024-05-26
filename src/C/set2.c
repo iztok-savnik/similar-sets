@@ -188,8 +188,8 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
          set_print(stdout, sp);
 	 //fprintf(stdout, " ");
          //set_tl_print(stdout, se);
-	 fprintf(stdout, " (%d,%d)\n", *add, tmp_skp);
-         //fprintf(stdout, "\n");        
+	 //fprintf(stdout, " (%d,%d)\n", *add, tmp_skp);
+         fprintf(stdout, "\n");        
       }
 
       // return if connector was not created
@@ -214,8 +214,8 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
          set_print(stdout, sp);
          fprintf(stdout, " ");
          set_tl_print(stdout, st->sub.tail);
-	 fprintf(stdout, " (%d,%d)\n", *add, *skp);
-         //fprintf(stdout, "\n");        
+	 //fprintf(stdout, " (%d,%d)\n", *add, *skp);
+         fprintf(stdout, "\n");        
       }
 
       // restire skp and add
@@ -235,8 +235,8 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 
       if (nel > li->key) {
 	
-        // nothing more to skip in se if nel=-1!
-	// one more can be added?
+         // nothing more to skip in se if nel=-1!
+  	 // one more can be added?
          if (*add > 0) {
       
             // add elem from link, search in sub-tree then get next one
@@ -289,7 +289,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 	    // in se.  note: we delete nel from the solution.
 	    // advancement to next elements possible ONLY while skp>0.
 	    set_read(se);
-            // st-sub.link is already at the next position. by using
+            // st.sub.link is already at the next position. by using
 	    // the same link (used to descend) we come to the same
 	    // situation as with "equality" descent, with one add and
 	    // one skip. no need for another con_read.
@@ -467,7 +467,7 @@ set2_node* set2_load( FILE *f )
 
       } while ((tok = (char *)strtok(NULL," \n\f\r")) != NULL);
          
-      // reset access to se and insert s1 into set-trie
+      // reset access to s1 for reading and insert s1 into set-trie
       set_open(s1);
       set2_insert(s2p, s1);
    }

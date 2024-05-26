@@ -122,10 +122,10 @@ sub main_check_similar {
       $d1 = ($d2 = 2);
 
       # if len of @t less than 2*d1 
-      if ((scalar @t) < 2*$d1) {
-	 #print "skipped\n";
-	 next;
-      }
+      #if ((scalar @t) < 2*$d1) {
+      #	 #print "skipped\n";
+      #	 next;
+      #}
       
       # go thru data sets and check similarity with current test set
       for (my $i = 0; $i <= ($ds_size - 1); $i++) {

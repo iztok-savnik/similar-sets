@@ -11,8 +11,11 @@
 /* Global constants, types, ... */ 
 
 /*
-  A set is a structure composed of the length of a set stored in a
-  sorted array of integer numbers.
+  A set is a structure composed of the length of a set, the index of
+  the last element in set, the index of the current element in the
+  set, and a sorted array of integer numbers. The current element,
+  thogether with the functions set_open(), set_read(), set_write() and
+  set_eos(), implements a file-like access to sets.
 */
 typedef struct set {
   int length;
@@ -25,17 +28,14 @@ typedef struct set {
 
 extern set    *set_alloc();
 extern boolean set_free( set *sp );
-extern boolean set_reset( set *sp );
+extern int     set_size( set *sp );
+
+extern boolean set_member( set* sp, int el );
 extern void    set_sort( set* sp );
 
-extern int     set_get( set *sp, int ix );
-extern boolean set_put( set *sp, int ix, int el );
-
-extern int     set_size( set *sp );
-extern boolean set_member( set* sp, int el );
 extern boolean set_open( set *sp );
 extern boolean set_open_at( set *sp, int el );
-
+extern boolean set_reset( set *sp );
 extern int     set_peek( set *sp );
 extern int     set_read( set *sp );
 extern void    set_unread( set *sp, int n );

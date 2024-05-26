@@ -42,12 +42,7 @@ set *set_alloc()
  */
 boolean set_reset(set *sp)
 {
-   // realloc array of ints
-   //free(sp->arr);
-   //sp->arr = (int *)malloc(INIT_SET_SIZE * sizeof(int));
-
-   // init set parameters
-   //sp->length = INIT_SET_SIZE;
+  // reset the last and cursor
    sp->last = -1;
    sp->cursor = -1;
    return true;
@@ -118,7 +113,8 @@ int set_length(set *sp )
 } /*set_length*/
 
 /*
-  Get an element of the parameter set sp with the index ix. 
+  Get an element of the parameter set sp with the index ix.
+  OBSOLATE.
  */
 int set_get(set *sp, int ix )
 {
@@ -126,6 +122,10 @@ int set_get(set *sp, int ix )
    
 } /*set_get*/
 
+/*
+  Put the element el in the set sp at the index ix. 
+  OBSOLATE.
+ */
 boolean set_put(set *sp, int ix, int el)
 {
    // check index ?
