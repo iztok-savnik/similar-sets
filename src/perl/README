@@ -1,3 +1,4 @@
+
 How to generate:
 
 1) sorted datasets
@@ -5,15 +6,12 @@ How to generate:
 3) mappings based on frequencies
 4) datasets mapped on the basis of element frequencies
 5) sorted mapped datasets
+6) testset from a dataset
 
-[set-similarity]$ ./sort-dataset.pl < dataset.txt > dataset.txt.sorted 
-[set-similarity]$ ./symb-freq.pl < dataset.txt | sort -n -r -k2 > dataset.freq
-[set-similarity]$ ./gen-map-onfreq.pl < dataset.freq > dataset.freq.map
-[set-similarity]$ ./map-onfreq-dataset.pl dataset.freq.map < dataset.txt > dataset.txt.mapd
-[set-similarity]$ ./sort-dataset.pl < dataset.txt.mapd > dataset.txt.mapd.sorted 
-
-
-
-
-
+1) $ ./sort-dataset.pl < dataset > dataset.sorted 
+2) $ ./symb-freq.pl < dataset | sort -n -r -k2 > dataset.freq
+3) $ ./gen-map-onfreq.pl < dataset.freq > dataset.freq.map
+4) $ ./map-onfreq-dataset.pl dataset.freq.map < dataset > dataset.mapd
+5) $ ./sort-dataset.pl < dataset.mapd > dataset.mapd.sorted 
+6) $ ./gen-testset.pl percent < dataset.mapd > dataset.mapd.test
 
