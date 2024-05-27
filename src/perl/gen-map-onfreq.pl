@@ -20,7 +20,7 @@ tie %map, 'BerkeleyDB::Btree',
 sub test_gen_map_onfreq {
 
    # counting sets
-   my $i = 0;
+   my $i = 1;
    my (@l,@l1);
 
    # load frequencies and generate a mapping

@@ -119,8 +119,8 @@ sub main_check_similar {
       my @t = split " ";
       $str = join " ", @t;
       print "? ".$str."\n";
-      $d1 = ($d2 = 2);
 
+      #$d1 = ($d2 = 1);
       # if len of @t less than 2*d1 
       #if ((scalar @t) < 2*$d1) {
       #	 #print "skipped\n";
@@ -130,7 +130,7 @@ sub main_check_similar {
       # go thru data sets and check similarity with current test set
       for (my $i = 0; $i <= ($ds_size - 1); $i++) {
          @d = split " ", $ds[$i];
-         $d1 = ($d2 = 2);
+         $d1 = ($d2 = 1);
 	 
 	 if (&check_similar(\@t, \@d, \$d1, \$d2)) {
 
