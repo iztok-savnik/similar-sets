@@ -14,7 +14,7 @@
 #include <malloc.h>
 #include "config.h"
 #include "set.h"
-//#include "common.h"
+#include "qesa.h"
 #include "connector.h"
 #include "set2.h"
  
@@ -171,7 +171,7 @@ void set2_insert( set2_node *st, set *se )
   Search in set-trie st the sets that are similar to the set se. The
   current path from root to active node is stored in the set sp. 
  */
-void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
+void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *qp )
 {
    int nel = 0;           // next element
    int cnl = 0;           // count delete operations
@@ -185,11 +185,12 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
       int tmp_skp = (*skp) - set_tl_length(se);
       if (tmp_skp >= 0) {
 
-         set_print(stdout, sp);
+	 qesa_write(qp, (void *)set_copy(sp));
+	 //set_print(stdout, sp);
 	 //fprintf(stdout, " ");
          //set_tl_print(stdout, se);
 	 //fprintf(stdout, " (%d,%d)\n", *add, tmp_skp);
-         fprintf(stdout, "\n");        
+         //fprintf(stdout, "\n");        
       }
 
       // return if connector was not created
@@ -210,12 +211,13 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
       // check if tail in st is similar to the rest of se
       if (set_tl_similar(st->sub.tail, se, skp, add)) {
 
+	 qesa_write(qp, (void *)(st->sub.tail));
          // left for testing. should be the same as st->sub.tail
-         set_print(stdout, sp);
-         fprintf(stdout, " ");
-         set_tl_print(stdout, st->sub.tail);
+         //set_print(stdout, sp);
+         //fprintf(stdout, " ");
+         //set_tl_print(stdout, st->sub.tail);
 	 //fprintf(stdout, " (%d,%d)\n", *add, *skp);
-         fprintf(stdout, "\n");        
+         //fprintf(stdout, "\n");        
       }
 
       // restire skp and add
@@ -246,7 +248,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 	       // descend only with li->key
 	       set_push(sp, li->key);
 	       (*add)--;
-               set2_simsearch(li->val, se, sp, skp, add);
+               set2_simsearch(li->val, se, sp, skp, add, qp);
 	       (*add)++;
                set_pop(sp);
 
@@ -275,7 +277,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 	 // descend in both, se and st.
 	 nel = set_read(se);
          set_push(sp, nel);
-         set2_simsearch(li->val, se ,sp, skp, add);
+         set2_simsearch(li->val, se ,sp, skp, add, qp);
 	 set_pop(sp);
 	 set_unread(se, 1);
 
@@ -362,7 +364,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add )
 	    // descend only with li->key
 	    set_push(sp, li->key);
 	    (*add)--;
-            set2_simsearch(li->val, se, sp, skp, add);
+            set2_simsearch(li->val, se, sp, skp, add, qp);
 	    (*add)++;
             set_pop(sp);
 

@@ -167,7 +167,8 @@ void do_test_subseteq()
   char *lin = (char *)malloc(200);
   char *tok = (char *)malloc(200);
   set_type S;
-
+  uint64_t elaps;
+  
   if (testf_rewind++) rewind(testf);
   printf("--Test subseteq\n");
 
@@ -191,21 +192,16 @@ void do_test_subseteq()
 
      // set time related stuff
      long tsec, tnsc;
-     struct timespec tstart={0,0}, tend={0,0};
-     clock_gettime(CLOCK_MONOTONIC, &tstart);
+     struct timespec start={0,0}, end={0,0};
+     clock_gettime(CLOCK_MONOTONIC, &start);
 
      // check subseteq
      subseteq_cnt = 0;
      boolean result = set2_subseteq(gst, &S, 0); 
-     clock_gettime(CLOCK_MONOTONIC, &tend);
+     clock_gettime(CLOCK_MONOTONIC, &end);
 
-     if ((tend.tv_nsec - tstart.tv_nsec) < 0) {
-        tsec = tend.tv_sec - tstart.tv_sec - 1;
-        tnsc = 1000000000 + tend.tv_nsec - tstart.tv_nsec;
-     } else {
-        tsec = tend.tv_sec - tstart.tv_sec;
-        tnsc = tend.tv_nsec - tstart.tv_nsec;
-     }
+     elaps = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+     printf("elapsed time = %llu nanoseconds\n", (long long unsigned int) diff);
 
      // print result
      if (result) 

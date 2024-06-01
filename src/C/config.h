@@ -19,6 +19,7 @@
 #define MAX_STRING_SIZE    100000000
 #define INIT_STRING_SIZE   10000
 #define INIT_SET_SIZE      2
+#define INIT_QESA_SIZE     10
 #define INIT_CONNECT_SIZE  2
 
 #define max(a,b)  ((a) > (b) ? (a) : (b))

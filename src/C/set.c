@@ -324,6 +324,23 @@ boolean set_insert( set *sp, int el )
 } /*set_insert*/
 
 /*
+  Make a copy of a set sp and return the pointer to a copy.
+*/
+set *set_copy(set *sp)
+{
+   // alloc new set and copy content
+   set *ns = set_alloc();
+   //*ns = *sp;
+
+   // insert elements in new set and return
+   for (int i = 0; i <= sp->last; i++) {
+     set_write(ns, sp->arr[i]);
+   }
+   return ns;
+   
+} /*set_copy*/
+
+/*
   Prints a set st to file f with the spaces in between the elements.
 */
 void set_print(FILE *f, set *sp)

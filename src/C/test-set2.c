@@ -10,11 +10,13 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <memory.h>
 #include <malloc.h>
 #include <string.h>
 #include "config.h"
 #include "set.h"
+#include "qesa.h"
 #include "set2.h"
 #include "connector.h"
 
@@ -29,15 +31,23 @@ void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
    // save simsearch params
    int d1 = *add;
    int d2 = *skp;
+   printf("# add=%d, skp=%d\n", d1, d2);
 
    // init main vars
    int el = -1;
    char *lin = (char *)malloc(MAX_STRING_SIZE);
    char *tok = (char *)malloc(INIT_STRING_SIZE);
 
+   // define time stuff
+   uint64_t elap;
+   struct timespec start={0,0}, end={0,0};
+   
    // set of integers to store sets read from file
    set *s1 = set_alloc();
    set *sp = set_alloc();
+
+   // create qesa for storing the results of queries
+   void *q1 = qesa_alloc();
 
    // read lines from input 
    while (fgets(lin, MAX_STRING_SIZE, f) != NULL) {
@@ -62,11 +72,24 @@ void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
       // reset set sp and simsearch params
       set_open(s1);
       set_reset(sp);
+      qesa_reset(q1);
       *add = d1;
       *skp = d2;
       
+      // measure elapsed time
+      clock_gettime(CLOCK_MONOTONIC, &start);
+
       // find in st the sets that are similar to s1
-      set2_simsearch(st, s1, sp, add, skp);
+      set2_simsearch(st, s1, sp, add, skp, q1);
+
+      clock_gettime(CLOCK_MONOTONIC, &end);
+      elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+
+      // print qesax
+      qesa_print(stdout, q1);
+
+      // print elapsed time
+      printf("= %llu\n", (long long unsigned int) elap);
    }
 
    // free the set s1
@@ -84,19 +107,19 @@ void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
 int main( int argc, char *argv[] )
 {  
 
-   //printf("-------Reading a dataset from a file.\n");
-   FILE *infile = fopen(argv[1], "r");
+   // reading a dataset from a file
+   FILE *infile = fopen(argv[3], "r");
    set2_node *st = set2_load(infile);
 
-   //printf("-------Printing a dataset from set-trie st.\n");
+   // printing a dataset from set-trie st
    //set2_store(stdout, st);
    fclose(infile);
 
    // simserach params
-   int add = 2;
-   int skp = 2;
+   int add = atoi(argv[1]);
+   int skp = atoi(argv[2]);
 
-   //printf("-------Foreach set from testset search simsets in st: add=%d, skp=%d.\n", add, skp);
+   // foreach set from testset search simsets in st
    apply_tests_to_strie(stdin, st, &skp, &add);
    
 } /*main*/
@@ -140,10 +163,10 @@ int old_main( int argc, char *argv[] )
    printf("-------Creating set sp.\n");
    set *sp = set_alloc(10);
 
-   int add = 2;
-   int skp = 2;
+   int add = 1;
+   int skp = 1;
 
    printf("-------Find in st sets similar to s1: add=%d, skp=%d.\n", add, skp);
-   set2_simsearch(st, s1, sp, &skp, &add);
+   //set2_simsearch(st, s1, sp, &skp, &add);
    
 } /*main*/
