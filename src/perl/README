@@ -1,5 +1,5 @@
 
-How to generate:
+Generating datasets for testing:
 
 1) sorted datasets
 2) frequencies of datatset elements
@@ -7,6 +7,7 @@ How to generate:
 4) datasets mapped on the basis of element frequencies
 5) sorted mapped datasets
 6) testset from a dataset
+7) sorted testsets
 
 1) $ ./sort-dataset.pl < dataset > dataset.sorted 
 2) $ ./symb-freq.pl < dataset | sort -n -r -k2 > dataset.freq
@@ -14,4 +15,6 @@ How to generate:
 4) $ ./map-onfreq-dataset.pl dataset.freq.map < dataset > dataset.mapd
 5) $ ./sort-dataset.pl < dataset.mapd > dataset.mapd.sorted 
 6) $ ./gen-testset.pl percent < dataset.mapd > dataset.mapd.test
+7) $ ./sort-dataset.pl < dataset.mapd.test > dataset.mapd.test.sorted 
 
+experiments with set2 use dataset.mapd.sorted and dataset.mapd.test.sorted,
