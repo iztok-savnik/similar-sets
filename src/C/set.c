@@ -387,11 +387,12 @@ void set_tl_print( FILE *f, set *sp )
 } /*set_tail_print*/
 
 /*
-  Compares two sets for similarity. Returns true if similar and false
+  Compares two sets for similarity using LCS (longest common
+  subsequence) distance. Returns true if similar and false
   otherwise. After the function completes execution the cursor in both
   sets stays at the same position as before function call.
  */
-boolean set_tl_similar( set *sp, set *se, int *skp, int *add )
+boolean set_tl_similar_lcs( set *sp, set *se, int *skp, int *add )
 {
    // elements from sp and se
    int esp = 0;           // element from sp
@@ -482,5 +483,105 @@ boolean set_tl_similar( set *sp, set *se, int *skp, int *add )
       se->cursor = cse;
       return rtval;
    }   
-} /*set_tl_similar*/
+} /*set_tl_similar_lcs*/
+
+/*
+  Compares two sets for similarity using Hamming distance. Returns
+  true if similar and false otherwise. After the function completes
+  execution the cursor in both sets stays at the same position as
+  before function call.
+ */
+boolean set_tl_similar_hmg( set *sp, set *se, int *hmg )
+{
+   // elements from sp and se
+   int esp = 0;           // element from sp
+   int ese = 0;           // element from se
+   int csp = sp->cursor;  // remember original positions 
+   int cse = se->cursor;  // of cursors
+   boolean rtval;         // return value
+   
+   while (!set_eos(sp) && !set_eos(se)) {
+
+      esp = set_peek(sp);
+      ese = set_peek(se);
+
+      if (esp == ese) {
+
+  	 // move the cursors
+	 set_read(sp);
+	 set_read(se);
+	 continue;
+
+      } else {
+
+	 // add an element to result sp if permitted
+ 	 if (esp < ese) {
+
+	    if (*hmg > 0) {
+	       set_read(sp);
+	       (*hmg)--;
+	       continue;
+	       
+	    } else {
+
+	       // no more adding; restore cursors
+	       sp->cursor = csp;
+	       se->cursor = cse;
+	       return false;   
+	    }
+	   
+	 } else {
+
+	    // skip an element from se if still possible
+	    if (*hmg > 0) {
+	       set_read(se);
+	       (*hmg)--;
+	       continue;
+	       
+	    } else {
+
+	       // no more skipping; restore the cursors
+	       sp->cursor = csp;
+	       se->cursor = cse;
+	       return false;   
+	    }
+         }
+      } 
+   } // while
+
+   // handle tails
+   if (set_eos(sp) && set_eos(se)) {
+
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+
+      // skp and add are >= 0.
+      return true;
+   }
+   
+   if (set_eos(sp)) {
+    
+      // true only if remaining elems from se can be skipped
+      *hmg -= set_tl_length(se);
+      rtval = (*hmg) >= 0; 
+
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+      return rtval;
+
+   } else { // set_eos(se) && !set_eos(sp)
+
+      // true only if remaining elems from sp can be added
+      *hmg -= set_tl_length(sp);
+      rtval = (*hmg) >= 0;
+      
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+      return rtval;
+   }   
+} /*set_tl_similar_hmg*/
+
 

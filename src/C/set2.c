@@ -168,10 +168,212 @@ void set2_insert( set2_node *st, set *se )
 } /*set2_insert*/
 
 /*
+  Search in set-trie st the sets that are similar to the set se using
+  the Hamming distance. The current path from root to active node is
+  stored in the set sp.
+ */
+void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
+{
+   int nel = 0;           // next element
+   int cnl = 0;           // count delete operations
+   link *li = NULL;
+
+   // are we at the end of a set?
+   if (st->isset) {
+
+      // sp is similar to se if length of se's tail is less than or
+      // equal to number of skipped elements in se.
+      if (((*hmg) - set_tl_length(se)) >= 0) {
+
+	 qesa_write(qp, (void *)set_copy(sp));
+      }
+
+      // return if connector was not created
+      if (st->sub.link == NULL) {
+
+	 // nothing else to do
+	 return;
+      }
+   }
+
+   // are we in a tail?
+   if (st->istail) {
+
+      // save hmg
+      int tmphmg = *hmg;
+
+      // check if tail in st is similar to the rest of se
+      if (set_tl_similar_hmg(st->sub.tail, se, hmg)) {
+
+	 qesa_write(qp, (void *)(st->sub.tail));
+      }
+
+      // restire hmg
+      *hmg = tmphmg;
+      return;
+   }
+
+   // open access to links
+   con_open(st->sub.link);
+
+   while (!set_eos(se) && !con_eos(st->sub.link)) {
+
+      // peek heads of both sets
+      nel = set_peek(se);   // peek the next elm in se
+      li  = con_peek(st->sub.link); // peek the next link li
+
+      if (nel > li->key) {
+	
+  	 // more elements can be added?
+         if (*hmg > 0) {
+      
+            // add elem from link, search in sub-tree then get next one
+	    do {
+ 	       con_read(st->sub.link);
+
+	       // descend only with li->key
+	       set_push(sp, li->key);
+	       (*hmg)--;
+               set2_simsearch_hmg(li->val, se, sp, hmg, qp);
+	       (*hmg)++;
+               set_pop(sp);
+
+               // check next link in connector
+	       li = con_peek(st->sub.link);
+	    
+	    } while ((li != NULL) && (nel > li->key));
+
+            continue;
+	    
+	 } else {
+
+            // (nel > li->key) && (hmg = 0) ==> try to descend in st
+            // and se with nel. for now, read a link at the position
+            // nel from the connector.
+            con_open_at(st->sub.link, nel);
+            li = con_peek(st->sub.link);
+
+            continue;
+         }
+
+      } else if (nel == li->key) {
+
+ 	 // link and se are valid; no need to check.
+	 // descend in both, se and st.
+	 nel = set_read(se);
+         set_push(sp, nel);
+         set2_simsearch_hmg(li->val, se ,sp, hmg, qp);
+	 set_pop(sp);
+	 set_unread(se, 1);
+
+	 // descend also in tree set with li->key
+         li = con_read(st->sub.link); 
+
+	 // if possible skip element from se
+	 if (*hmg > 0) {
+
+ 	    // descend only in se, ie., skip one in se, or delete one
+	    // in se.  note: we delete nel from the solution.
+	    // advancement to next elements possible ONLY while hmg>0.
+	    set_read(se);
+            // st.sub.link is already at the next position. by using
+	    // the same link (used to descend) we come to the same
+	    // situation as with "equality" descent, with one add and
+	    // one skip. no need for another con_read.
+ 	    cnl++;
+	    (*hmg)--;
+            continue;
+	    
+	 } else {
+
+	    // can not skip nel so no more adding is possible in the
+	    // given position.
+
+	    // restore cursor in se (skips) to the position when
+	    // function entered. restore the state of hmg to previous
+	    // position.
+            if (cnl > 0) {
+               *hmg += cnl;
+               set_unread(se, cnl);
+            }
+	    return;
+	 }
+	 
+      } else /* nel < li->key */ {
+	
+	 // if possible skip element from se
+	 if (*hmg > 0) {
+
+ 	    // descend only in se, ie., skip one in se, or delete one
+	    // in se. note: we delete nel from the solution.
+	    // advancement to next elements possible only if skp>0.
+	    set_read(se);
+ 	    cnl++;
+	    (*hmg)--;
+            continue;
+	    
+         } else {
+	   
+	    // hmg = 0 and therefore nel can not be skipped. otherwise
+	    // the selected set is not similar any more with se.
+	    // therefore we can not add more elements from a tree set.
+
+            // restore cursor in se and update skp accordingly.
+            if (cnl > 0) {
+               *hmg += cnl;
+               set_unread(se, cnl);
+            }
+	    return;
+	 }
+      }
+      
+   } // while
+
+   // if (set_eos(se) && con_eos(st->sub.link)) {
+         // nothing more to do in this node. 
+   // } else if (con_eos(st->sub.link)) /* && !set_eos(se) */ { 
+         // can skip remaining elms from se if skp >=
+         // set_tl_lnegth(se). and if st->isset is true then sp is the
+         // result. this is the same situation as when st->isset is true
+         // at the beginning of this function.
+   // } else /* set_eos(se) && !con_eos(st->sub.link) */ {
+
+   if (set_eos(se) && !con_eos(st->sub.link)) {
+
+      if (*hmg > 0) {
+      
+         // add elem from link, search in sub-tree then get next one
+	 do {
+ 	    li = con_read(st->sub.link);
+
+	    // descend only with li->key
+	    set_push(sp, li->key);
+	    (*hmg)--;
+            set2_simsearch_hmg(li->val, se, sp, hmg, qp);
+	    (*hmg)++;
+            set_pop(sp);
+
+	    // check next link in connector
+	    li = con_peek(st->sub.link);
+	    
+	 } while (li != NULL);
+      }
+   }
+
+   // restore cursor in se and update skp accordingly.
+   if (cnl > 0) {
+      *hmg += cnl;
+      set_unread(se, cnl);
+   }
+   return;
+   
+} /*set2_simsearch_hmg*/
+
+/*
   Search in set-trie st the sets that are similar to the set se. The
   current path from root to active node is stored in the set sp. 
  */
-void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *qp )
+void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *qp )
 {
    int nel = 0;           // next element
    int cnl = 0;           // count delete operations
@@ -209,7 +411,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *
       int tmp_add = *add;
 
       // check if tail in st is similar to the rest of se
-      if (set_tl_similar(st->sub.tail, se, skp, add)) {
+      if (set_tl_similar_lcs(st->sub.tail, se, skp, add)) {
 
 	 qesa_write(qp, (void *)(st->sub.tail));
          // left for testing. should be the same as st->sub.tail
@@ -248,7 +450,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *
 	       // descend only with li->key
 	       set_push(sp, li->key);
 	       (*add)--;
-               set2_simsearch(li->val, se, sp, skp, add, qp);
+               set2_simsearch_lcs(li->val, se, sp, skp, add, qp);
 	       (*add)++;
                set_pop(sp);
 
@@ -277,7 +479,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *
 	 // descend in both, se and st.
 	 nel = set_read(se);
          set_push(sp, nel);
-         set2_simsearch(li->val, se ,sp, skp, add, qp);
+         set2_simsearch_lcs(li->val, se ,sp, skp, add, qp);
 	 set_pop(sp);
 	 set_unread(se, 1);
 
@@ -364,7 +566,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *
 	    // descend only with li->key
 	    set_push(sp, li->key);
 	    (*add)--;
-            set2_simsearch(li->val, se, sp, skp, add, qp);
+            set2_simsearch_lcs(li->val, se, sp, skp, add, qp);
 	    (*add)++;
             set_pop(sp);
 
@@ -382,7 +584,7 @@ void set2_simsearch( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *
    }
    return;
    
-} /*set2_simsearch*/
+} /*set2_simsearch_lcs*/
 
 /*
   Write a set-trie to file in left-deep first order to the file f.

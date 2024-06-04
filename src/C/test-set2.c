@@ -25,8 +25,9 @@
 
 
 /*
+ * Apply test join using LCS measure.
  */
-void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
+void apply_tests_to_strie_lcs( FILE *f, set2_node *st, int *add, int *skp ) {
 
    // save simsearch params
    int d1 = *add;
@@ -80,7 +81,7 @@ void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
       clock_gettime(CLOCK_MONOTONIC, &start);
 
       // find in st the sets that are similar to s1
-      set2_simsearch(st, s1, sp, add, skp, q1);
+      set2_simsearch_lcs(st, s1, sp, add, skp, q1);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
       elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
@@ -100,7 +101,84 @@ void apply_tests_to_strie( FILE *f, set2_node *st, int *add, int *skp ) {
    free(lin);
    free(tok);
    
-} /*apply_tests_to_strie*/
+} /*apply_tests_to_strie_lcs*/
+
+/*
+ * Apply test join using Hamming measure.
+ */
+void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
+
+   // save simsearch params
+   int d1 = *hmg;
+   printf("# hamming=%d\n", d1);
+
+   // init main vars
+   int el = -1;
+   char *lin = (char *)malloc(MAX_STRING_SIZE);
+   char *tok = (char *)malloc(INIT_STRING_SIZE);
+
+   // define time stuff
+   uint64_t elap;
+   struct timespec start={0,0}, end={0,0};
+   
+   // set of integers to store sets read from file
+   set *s1 = set_alloc();
+   set *sp = set_alloc();
+
+   // create qesa for storing the results of queries
+   void *q1 = qesa_alloc();
+
+   // read lines from input 
+   while (fgets(lin, MAX_STRING_SIZE, f) != NULL) {
+
+      // reset s1 to act as an empty set
+      set_reset(s1);
+   
+      // read next token from lin
+      tok = (char *)strtok(strtrm(lin)," \n\f\r");
+      do {
+
+	 el = atoi(tok);
+         set_insert(s1, el);
+
+      } while ((tok = (char *)strtok(NULL," \n\f\r")) != NULL);
+
+      // print the query
+      printf("? ");
+      set_print(stdout, s1);
+      printf("\n");
+      
+      // reset set sp and simsearch params
+      set_open(s1);
+      set_reset(sp);
+      qesa_reset(q1);
+      *hmg = d1;
+      
+      // measure elapsed time
+      clock_gettime(CLOCK_MONOTONIC, &start);
+
+      // find in st the sets that are similar to s1
+      set2_simsearch_hmg(st, s1, sp, hmg, q1);
+
+      clock_gettime(CLOCK_MONOTONIC, &end);
+      elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+
+      // print qesax
+      qesa_print(stdout, q1);
+
+      // print elapsed time
+      printf("= %llu\n", (long long unsigned int) elap);
+   }
+
+   // free the set s1
+   set_free(s1);
+   set_free(sp);
+   
+   // free allocated structures
+   free(lin);
+   free(tok);
+   
+} /*apply_tests_to_strie_hmg*/
 
 /*
  */
@@ -108,7 +186,7 @@ int main( int argc, char *argv[] )
 {  
 
    // reading a dataset from a file
-   FILE *infile = fopen(argv[3], "r");
+   FILE *infile = fopen(argv[2], "r");
    set2_node *st = set2_load(infile);
 
    // printing a dataset from set-trie st
@@ -116,11 +194,10 @@ int main( int argc, char *argv[] )
    fclose(infile);
 
    // simserach params
-   int add = atoi(argv[1]);
-   int skp = atoi(argv[2]);
+   int hmg = atoi(argv[1]);
 
    // foreach set from testset search simsets in st
-   apply_tests_to_strie(stdin, st, &skp, &add);
+   apply_tests_to_strie_hmg(stdin, st, &hmg);
    
 } /*main*/
 
