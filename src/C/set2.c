@@ -26,7 +26,10 @@ set2_node *set2_alloc()
    set2_node *st = (set2_node *)malloc(sizeof(set2_node));
    st->isset = false;
    st->istail = false;
+   st->sset = NULL;
    st->sub.link = NULL;
+   st->min = -1;
+   st->max = -1;
    st->cnt = 0;
    return st;
    
@@ -38,6 +41,23 @@ set2_node *set2_alloc()
 void set2_free( set2_node *st )
 {
 } /*set2_free*/
+
+
+/*
+  Update set length bounds for a given set2_node.
+ */
+void update_bounds( set2_node *st, set *su )
+{
+   int sulen = set_tl_length(su);
+   if ((sulen < (st->min)) || ((st->min) == -1)) {
+      st->min = sulen;
+   }
+   if ((sulen > (st->max)) || ((st->max) == -1)) {
+      st->max = sulen;
+   }
+   //printf("selen=%d, st-min=%d, st-max=%d\n", sulen, (st->min), (st->max));
+
+} /*update_bounds*/
 
 /*
   Inserts elements from two sets from their cursor on to the set-trie
@@ -61,6 +81,10 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
       if (el1 != el2) {
  	 // create and set set2-node for u1
 	 set2_node *sn1 = set2_alloc();
+
+	 // update min-max set length bounds
+         update_bounds(sn1, u1);           
+
 	 if (set_eos(u1)) {
 	    sn1->isset = true;
 	 } else {
@@ -71,6 +95,10 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 
  	 // create and set set2-node for u2
 	 set2_node *sn2 = set2_alloc();
+
+	 // update min-max set length bounds
+         update_bounds(sn2, u2);           
+
 	 if (set_eos(u2)) {
 	    sn2->isset = true;
 	 } else {
@@ -86,6 +114,10 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 	
  	 // create new set node for e1=e2.
 	 set2_node *sn1 = set2_alloc();
+
+	 // update min-max set length bounds
+         update_bounds(sn1, u1);           
+         update_bounds(sn1, u2);           
 
 	 // link s2p to sn1 through el1.
 	 con_insert(s2p->sub.link, el1, sn1);
@@ -122,12 +154,16 @@ void set2_insert( set2_node *st, set *se )
    int el;
    link *lp = NULL;
    set *sp = NULL;
+
+   // set tmp pointer to root; update min-max bounds
    set2_node *s2p = st;
+   update_bounds(s2p, se);
    
+   // go through elements of se
    while (!set_eos(se)) {
 
+      // inserting into tail set
       if (s2p->istail) {
-         // we are in tail set
          sp = s2p->sub.tail;       
 	 s2p->sub.link = NULL;
 
@@ -135,7 +171,7 @@ void set2_insert( set2_node *st, set *se )
 	 s2p->istail = false;
          set2_insert_merge(s2p, sp, se);
 	 return;
-       }
+      }
 
       // newly created set2-node?
       if (s2p->sub.link == NULL) {
@@ -152,6 +188,7 @@ void set2_insert( set2_node *st, set *se )
 
 	 // child for el does not exist; create new one
 	 set2_node *new_s2p = set2_alloc();
+
 	 con_insert(s2p->sub.link, el, new_s2p);
 	 s2p = new_s2p;
 	 
@@ -160,6 +197,10 @@ void set2_insert( set2_node *st, set *se )
 	 // child for el exists; just move there
 	 s2p = lp->val;
       }
+
+      // update min-max bounds
+      update_bounds(s2p, se);
+
    }
 
    // mark the end of set
@@ -177,7 +218,17 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
    int nel = 0;           // next element
    int cnl = 0;           // count delete operations
    link *li = NULL;
-
+   int selen = 0;
+   
+   // check the length of se tail against the min-max bounds
+   selen = set_tl_length(se);
+   //printf("selen=%d, st-min=%d, st-max=%d, hmg=%d\n", selen, (st->min), (st->max), (*hmg));
+   if ( ((selen + (*hmg)) < st->min) || (selen > (st->max + (*hmg)))) {
+      // too big even if all hmg used || too small even all hmg used
+      //printf("hit\n"); 
+      return;
+   }
+   
    // are we at the end of a set?
    if (st->isset) {
 
