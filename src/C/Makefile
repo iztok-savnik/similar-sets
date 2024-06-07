@@ -1,19 +1,22 @@
-# not finished...
 CC = gcc
 LINK = ld
 CFLAGS = -g
-OBJECTS = config.o set.o connector.o set2.o
+OBJECTS = config.o set.o qesa.o connector.o set2.o test-set2.o
 SLIBS = 
-PROGRAM = test
+PROGRAM = set2
 
 $(PROGRAM): 		$(OBJECTS) 
 	$(LINK.c) -o $@ $(OBJECTS) $(SLIBS)
 
 
-config.o:	config.h config.c
+config.o:	config.c
 
-set.o:		config.h set.h set.c
+set.o:		set.c
 
-connector.o:	config.h set.h set2.h connector.h connector.c
+qesa.o:		qesa.c
 
-set2.o:		config.h set.h connector.h set2.h set2.c
+connector.o:	connector.c
+
+set2.o:		set2.c
+
+test-set2.o:	test-set.c
