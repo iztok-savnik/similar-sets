@@ -29,13 +29,16 @@ typedef struct connector connector;
 
 /* A node of a set-trie. */
 typedef struct set2_node {
-   boolean isset;    /* path represents a set */
-   boolean istail;   /* path is a prefix of a tail set */
+   boolean isset;    // path represents a set
+   boolean istail;   // path is a prefix of a tail set 
+   set *ndset;       // node set stored if isset
    union {
-      connector *link; /* reference to an instance of a kvstore */
-      set *tail;       /* reference to set; tail of a set sequence */
+      connector *link; // reference to an instance of a kvstore 
+      set *tail;       // reference to set; tail of a set sequence 
    } sub;
-   int cnt;         /* number of sets in trie with a given prefix */	
+   int min;   // min set that goes through this node 
+   int max;   // max set that goes through this node
+   int cnt;   // number of sets in trie with a given prefix */	
 } set2_node;
 
 /*---------------------- Exported functions ------------------------------*/

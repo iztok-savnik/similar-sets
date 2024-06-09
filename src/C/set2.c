@@ -26,7 +26,7 @@ set2_node *set2_alloc()
    set2_node *st = (set2_node *)malloc(sizeof(set2_node));
    st->isset = false;
    st->istail = false;
-   st->sset = NULL;
+   st->ndset = NULL;
    st->sub.link = NULL;
    st->min = -1;
    st->max = -1;
@@ -87,6 +87,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 
 	 if (set_eos(u1)) {
 	    sn1->isset = true;
+ 	    sn1->ndset = u1;
 	 } else {
 	    sn1->istail = true;
 	    sn1->sub.tail = u1;
@@ -101,6 +102,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 
 	 if (set_eos(u2)) {
 	    sn2->isset = true;
+	    sn2->ndset = u2;
 	 } else {
 	    sn2->istail = true;
 	    sn2->sub.tail = u2;
@@ -126,20 +128,24 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
    }
 
    // the only case when s2p->sub.link stays NULL
-   // u1 = u2; 
+   // u1 = u2;
+   // !!!one of sets should be disposed
    if (set_eos(u1) && set_eos(u2)) {
       s2p->isset = true;
+      s2p->ndset = u2;
       return;
    }
    // end of u1
    if (set_eos(u1)) {
       s2p->isset = true;
+      s2p->ndset = u1;
       s2p->istail = true;
       s2p->sub.tail = u2;
 
    // end of u2
    } else {
       s2p->isset = true;
+      s2p->ndset = u2;
       s2p->istail = true;
       s2p->sub.tail = u1;
       
@@ -203,7 +209,8 @@ void set2_insert( set2_node *st, set *se )
 
    }
 
-   // mark the end of set
+   // save set se and mark the end of set
+   s2p->ndset = se;
    s2p->isset = true;
    return;
 } /*set2_insert*/
@@ -236,7 +243,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // equal to number of skipped elements in se.
       if (((*hmg) - set_tl_length(se)) >= 0) {
 
-	 qesa_write(qp, (void *)set_copy(sp));
+	qesa_write(qp, (void *)(st->ndset));
       }
 
       // return if connector was not created
