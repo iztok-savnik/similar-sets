@@ -116,7 +116,8 @@ boolean qesa_eos(qesa *qp)
 } /*qesa_eos*/
 
 /*
-  Add a new element at the end of the array representing a qesa.
+  Add a new element at the end of the array representing a
+  qesa. Extend the array if no more room in the existing array.
  */
 boolean qesa_write(qesa *qp, void *ptr)
 {
@@ -135,6 +136,64 @@ boolean qesa_write(qesa *qp, void *ptr)
    return true;
   
 } /*qesa_write*/
+
+/*
+  Retrieve an element with the index ky.
+ */
+void *qesa_retrieve(qesa *qp, int ky)
+{
+   // check for space
+   if (ky > (qp->length - 1)) {
+      printf("error: (qesa_retrieve) key out of range.\n");
+      return NULL;
+   }
+
+   // return (void +) ptr for a key ky
+   return (void *)qp->arr[ky];
+  
+} /*qesa_retrieve*/
+
+/*
+  Update an element ky with the new value ptr. In the case element ky
+  is larger than the length of qp then realloc the memory to store the
+  element.
+ */
+boolean qesa_update(qesa *qp, int ky, void *ptr)
+{
+   // check for space
+   if (ky > (qp->length - 1)) {
+      qp->length = ky + INIT_QESA_SIZE;
+      qp->arr = (void *)realloc(qp->arr, qp->length * sizeof(void *));
+      if (qp->arr == NULL) {
+         printf("error: (qesa_update) realloc failed.\n");
+         return false;
+      }
+   }
+
+   // insert ptr at the end of int sequence
+   qp->arr[ky] = ptr;
+   return true;
+  
+} /*qesa_update*/
+
+/*
+  Function assumes that the value of a key ky is not NULL and it is a
+  pointer to an integer. The integer value for a key ky is incremented
+  by one. 
+ */
+boolean qesa_increment(qesa *qp, int ky)
+{
+   // check for space
+   if (ky > (qp->length - 1)) {
+      printf("error: (qesa_increment) index out of range.\n");
+      return false;
+    }
+
+   // increment the integer value pointed by qp->arr[ky]
+   *((int *)qp->arr[ky]) = (*((int *)qp->arr[ky]) + 1);
+   return true;
+  
+} /*qesa_increment*/
 
 /*
   Prints a set st to file f with the spaces in between the elements.
