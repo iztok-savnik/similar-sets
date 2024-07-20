@@ -14,8 +14,8 @@
 #include <malloc.h>
 #include "config.h"
 #include "set.h"
-#include "qesa.h"
-#include "set2.h"
+//#include "qesa.h"
+//#include "set2.h"
 #include "connector.h"
 
 /* Local variables */
@@ -192,8 +192,8 @@ boolean con_open_at(connector *sp, int key)
 } /*con_open_at*/
 
 /*
-  Peek the next reference to set2_node using cursor position.
-  Cursor is not changed.
+  Peek the next reference to object (value part of kv entry) using
+  cursor position. Cursor is not changed.
  */
 link* con_peek(connector* sp)
 {
@@ -204,7 +204,8 @@ link* con_peek(connector* sp)
 } /*con_peek*/
 
 /*
-  Read the next reference to set2_node using cursor position.
+  Read the next reference to object (value part of kv entry) using
+  cursor position.
  */
 link* con_read(connector* sp)
 {
@@ -229,7 +230,7 @@ boolean con_eos(connector *sp)
 /*
   Add a new key-value pair at the end of a sequence.
  */
-boolean con_write( connector *sp, int key, set2_node* val )
+boolean con_write( connector *sp, int key, void* val )
 {
    // check for space
    if (sp->last >= (sp->length - 1)) {
@@ -251,7 +252,7 @@ boolean con_write( connector *sp, int key, set2_node* val )
 /*
   Insert a key-value pair into an ordered sequence of key-value pairs.
 */
-boolean con_insert( connector *sp, int key, set2_node* pvl )
+boolean con_insert( connector *sp, int key, void* pvl )
 {
    // last_ix always points to the last accessed element
    if (sp->last >= (sp->length - 1)) {

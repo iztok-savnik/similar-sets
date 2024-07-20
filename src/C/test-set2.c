@@ -17,8 +17,8 @@
 #include "config.h"
 #include "set.h"
 #include "qesa.h"
-#include "set2.h"
 #include "connector.h"
+#include "set2.h"
 
 /*-------------------------- MAIN program ----------------------------------
  */

@@ -92,7 +92,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 	    sn1->istail = true;
 	    sn1->sub.tail = u1;
 	 }
-	 con_insert(s2p->sub.link, el1, sn1);
+	 con_insert(s2p->sub.link, el1, (void *)sn1);
 
  	 // create and set set2-node for u2
 	 set2_node *sn2 = set2_alloc();
@@ -107,7 +107,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 	    sn2->istail = true;
 	    sn2->sub.tail = u2;
 	 }
-	 con_insert(s2p->sub.link, el2, sn2);
+	 con_insert(s2p->sub.link, el2, (void *)sn2);
 	 
          // nothing more to do
 	 return;
@@ -122,7 +122,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
          update_bounds(sn1, u2);           
 
 	 // link s2p to sn1 through el1.
-	 con_insert(s2p->sub.link, el1, sn1);
+	 con_insert(s2p->sub.link, el1, (void *)sn1);
 	 s2p = sn1;
       }
    }
@@ -195,13 +195,13 @@ void set2_insert( set2_node *st, set *se )
 	 // child for el does not exist; create new one
 	 set2_node *new_s2p = set2_alloc();
 
-	 con_insert(s2p->sub.link, el, new_s2p);
+	 con_insert(s2p->sub.link, el, (void *)new_s2p);
 	 s2p = new_s2p;
 	 
       } else {
 
 	 // child for el exists; just move there
-	 s2p = lp->val;
+	s2p = (set2_node *)(lp->val);
       }
 
       // update min-max bounds
@@ -292,7 +292,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
 	       // descend only with li->key
 	       set_push(sp, li->key);
 	       (*hmg)--;
-               set2_simsearch_hmg(li->val, se, sp, hmg, qp);
+               set2_simsearch_hmg((set2_node *)(li->val), se, sp, hmg, qp);
 	       (*hmg)++;
                set_pop(sp);
 
@@ -320,7 +320,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
 	 // descend in both, se and st.
 	 nel = set_read(se);
          set_push(sp, nel);
-         set2_simsearch_hmg(li->val, se ,sp, hmg, qp);
+         set2_simsearch_hmg((set2_node *)(li->val), se ,sp, hmg, qp);
 	 set_pop(sp);
 	 set_unread(se, 1);
 
@@ -407,7 +407,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
 	    // descend only with li->key
 	    set_push(sp, li->key);
 	    (*hmg)--;
-            set2_simsearch_hmg(li->val, se, sp, hmg, qp);
+            set2_simsearch_hmg((set2_node *)(li->val), se, sp, hmg, qp);
 	    (*hmg)++;
             set_pop(sp);
 
@@ -508,7 +508,7 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
 	       // descend only with li->key
 	       set_push(sp, li->key);
 	       (*add)--;
-               set2_simsearch_lcs(li->val, se, sp, skp, add, qp);
+               set2_simsearch_lcs((set2_node *)(li->val), se, sp, skp, add, qp);
 	       (*add)++;
                set_pop(sp);
 
@@ -537,7 +537,7 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
 	 // descend in both, se and st.
 	 nel = set_read(se);
          set_push(sp, nel);
-         set2_simsearch_lcs(li->val, se ,sp, skp, add, qp);
+         set2_simsearch_lcs((set2_node *)(li->val), se ,sp, skp, add, qp);
 	 set_pop(sp);
 	 set_unread(se, 1);
 
@@ -624,7 +624,7 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
 	    // descend only with li->key
 	    set_push(sp, li->key);
 	    (*add)--;
-            set2_simsearch_lcs(li->val, se, sp, skp, add, qp);
+            set2_simsearch_lcs((set2_node *)(li->val), se, sp, skp, add, qp);
 	    (*add)++;
             set_pop(sp);
 
@@ -680,7 +680,7 @@ void set2_wtf( FILE *f, set2_node *st, set *se )
    for (li = con_read(st->sub.link); li != NULL; li = con_read(st->sub.link)) {
 
       set_push(se, li->key);
-      set2_wtf(f, li->val, se);
+      set2_wtf(f, (set2_node *)(li->val), se);
       set_pop(se);
    }
 

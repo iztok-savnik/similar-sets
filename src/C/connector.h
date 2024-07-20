@@ -11,12 +11,13 @@
 /* Global constants, types, ... */ 
 
 /* Declaration of circular typedef references. */
-typedef struct set2_node set2_node;
+//typedef struct set2_node set2_node;
+/* Removed: kv store of arbitrarily objects ref by (void *) 18/7/24
 
 /* A type kv_pair is a structure composed of two fields. */
 typedef struct link {
   int key;           /* a key is an element of a set */
-  set2_node *val;    /* value is, in this case, a ptr to a s2_node */
+  void *val;         /* value is of type (void *) */
 } link;
 
 /* A connector is a structure composed of a sequence of key-value
@@ -44,7 +45,7 @@ extern boolean con_open_at( connector* sp, int key );
 extern link*   con_peek( connector *sp );
 extern link*   con_read( connector *sp );
 extern boolean con_eos( connector *sp );
-extern boolean con_write( connector *sp, int key, set2_node* val );
-extern boolean con_insert( connector *sp, int key, set2_node* val );
+extern boolean con_write( connector *sp, int key, void* val );
+extern boolean con_insert( connector *sp, int key, void* val );
 
 #endif /* CONNECTOR_H */

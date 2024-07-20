@@ -15,7 +15,7 @@ s2_node. Conceptually, each s2_node includes a store of
 element/pointer (key/value) pairs including elements that lead to
 sub-tries (children nodes) of a given s2_node.
 
-The links from a s2_node to its children s2_nodes is implemented with
+The links from a s2_node to its children s2_nodes are implemented with
 skip lists of memory blocks. Each memory block includes a sorted array
 of key/value pairs. The key can only be an element of a set that
 follows (in a sorted order) the element represented b a current node.
@@ -25,8 +25,9 @@ The s2_node thus has 3 ...
 */
 
 /* Declaration of circular typedef references. */
-typedef struct connector connector;
-
+//typedef struct connector connector;
+/* Removed: kv store of arbitrarily objects ref by (void *) 18/7/24
+   
 /* A node of a set-trie. */
 typedef struct set2_node {
    boolean isset;    // path represents a set
