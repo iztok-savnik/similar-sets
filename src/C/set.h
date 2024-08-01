@@ -26,7 +26,7 @@ typedef struct set {
 
 /* Exported functions */
 
-extern set    *set_alloc();
+extern set*    set_alloc();
 extern boolean set_free( set *sp );
 extern int     set_size( set *sp );
 
@@ -45,7 +45,7 @@ extern boolean set_eos( set *sp );
 
 extern boolean set_push( set *sp, int el );
 extern int     set_pop( set *sp );
-extern set    *set_copy( set *sp );
+extern set*    set_copy( set *sp );
 extern void    set_print( FILE *f, set *sp );
 
 extern int     set_tl_length( set *sp );

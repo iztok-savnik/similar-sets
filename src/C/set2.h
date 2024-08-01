@@ -52,6 +52,6 @@ extern void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *
 extern void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qt );
 
 extern set2_node* set2_load( FILE *f );
-extern void set2_store( FILE *f, set2_node *st );
+extern void set2_store( set2_node *st, FILE *f );
 
 #endif /*SET2_H*/

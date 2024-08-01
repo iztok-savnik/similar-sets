@@ -28,10 +28,9 @@ int main( int argc, char *argv[] )
    void *ip = (void *)malloc(sizeof(int));
    int i = 0;
    int k = -1;
-   link *kp;
 
    printf("-------Initialization of a sequence.\n");
-   for (int i = 0; i<50; i++) {
+   for (int i = 1; i<50; i++) {
      void *ip = (void *)malloc(sizeof(int));
      *((int *)ip) = (i+1)*10;
      if (!con_write(sp, i*10, ip)) {
@@ -40,37 +39,100 @@ int main( int argc, char *argv[] )
    }
 
    printf("-------Testing con_lookup.\n");
-   if ((kp = con_lookup(sp, 42)) != NULL) {
-      printf("Lookup: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   } else {
-      printf("Lookup: no such key=%d\n", 42);
-      kp = con_peek(sp);
-      printf("Current: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   }
-   if ((kp = con_lookup(sp, 450)) != NULL) {
-      printf("Lookup: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   } else {
-      printf("Lookup: no such key=%d\n", 450);
-   }
-   if ((kp = con_lookup(sp, 155)) != NULL) {
-      printf("Lookup: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   } else {
-      printf("Lookup: no such key=%d\n", 155);
-      kp = con_peek(sp);
-      printf("Current: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   }
-   if ((kp = con_lookup(sp, 495)) != NULL) {
-      printf("Lookup: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-   } else {
-      printf("Lookup: no such key=%d\n", 495);
-      if (con_eos(sp)) {
-         printf("Current: eos for key=%d\n", 495);
-      } else { 
-         kp = con_peek(sp);
-         printf("Current: key=%d, val=%d\n", kp->key, *(int *)(kp->val));
-      }
-   }
+   link* lfnd = NULL;
+   link* lnxt = NULL;
+   link* lcur = NULL;
+   link* kp = NULL;
 
+   lfnd = con_lookup(sp, 5);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 5);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 10);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 10);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 42);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 42);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 450);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 450);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 155);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 155);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 495);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 495);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
+
+   printf("-----\n");
+   lfnd = con_lookup(sp, 490);
+   if (lfnd == NULL) printf("Lookup %d: no such key\n", 490);
+   else printf("Lookup: key=%d, val=%d\n", lfnd->key, *(int *)(lfnd->val));
+
+   lcur = con_current(sp);
+   if (lcur == NULL) printf("Current: no such key\n");
+   else printf("Current: key=%d, val=%d\n", lcur->key, *(int *)(lcur->val));
+
+   lnxt = con_peek(sp);
+   if (lnxt == NULL) printf("Next: no such key\n");
+   else printf("Next: key=%d, val=%d\n", lnxt->key, *(int *)(lnxt->val));
 
    printf("-------Print sequence from the beginning to the end.\n");
    con_open(sp);

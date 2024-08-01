@@ -19,10 +19,10 @@
 #include "qesa.h"
 #include "connector.h"
 #include "set2.h"
+#include "set2hat.h"
 
 /*-------------------------- MAIN program ----------------------------------
  */
-
 
 /*
  * Apply test join using LCS measure.
@@ -185,19 +185,30 @@ void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
 int main( int argc, char *argv[] )
 {  
 
-   // reading a dataset from a file
-   FILE *infile = fopen(argv[2], "r");
-   set2_node *st = set2_load(infile);
-
-   // printing a dataset from set-trie st
-   //set2_store(stdout, st);
-   fclose(infile);
-
    // simserach params
    int hmg = atoi(argv[1]);
+   int part_size = atoi(argv[2]);
+   char *fnam = argv[3];
+		      
+   // reading a dataset from a file
+   FILE *infile = fopen(fnam, "r");
+   set2_hat *sh = s2h_load(infile, part_size, hmg);
+   fclose(infile);
+
+   // printing statistics of the lengths of sets from a dataset
+   printf("Statistics of set lengths.\n");
+   qesa_print_inxs(sh->stats, stdout);
+   
+   // printing the mapping based on set length
+   printf("Print keys of a kvs (mapping).\n");
+   con_print_keys(sh->tries, stdout);
+   
+   // printing a dataset from set-trie sh
+   //set2_store(stdout, st);
+   
 
    // foreach set from testset search simsets in st
-   apply_tests_to_strie_hmg(stdin, st, &hmg);
+   //apply_tests_to_strie_hmg(stdin, sh, &hmg);
    
 } /*main*/
 

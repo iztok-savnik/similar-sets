@@ -37,11 +37,13 @@ extern void*   qesa_read( qesa *qp );
 extern boolean qesa_write( qesa *qp, void *ptr );
 extern boolean qesa_eos( qesa *qp );
 extern boolean qesa_reset( qesa *qp );
+extern int     qesa_cursor(qesa *qp);
 
 extern void*   qesa_retrieve(qesa *qp, int ky);
 extern boolean qesa_update(qesa *qp, int ky, void *ptr);
 extern boolean qesa_increment(qesa *qp, int ky);
 
-extern void    qesa_print( FILE *f, qesa *qp );
+extern void    qesa_print( qesa *qp, FILE *f );
+extern void    qesa_print_inxs( qesa *qp, FILE *f );
 
 #endif /* QESA_H */

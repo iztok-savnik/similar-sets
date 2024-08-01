@@ -138,6 +138,16 @@ boolean qesa_write(qesa *qp, void *ptr)
 } /*qesa_write*/
 
 /*
+  Retrieve the index of a current element in qp.
+ */
+int qesa_cursor(qesa *qp)
+{
+   // return current cursor
+   return qp->cursor;
+  
+} /*qesa_current*/
+
+/*
   Retrieve an element with the index ky.
  */
 void *qesa_retrieve(qesa *qp, int ky)
@@ -172,6 +182,10 @@ boolean qesa_update(qesa *qp, int ky, void *ptr)
 
    // insert ptr at the end of int sequence
    qp->arr[ky] = ptr;
+
+   // update qp->last if ky larger
+   if (ky > qp->last) qp->last = ky;
+   
    return true;
   
 } /*qesa_update*/
@@ -183,14 +197,30 @@ boolean qesa_update(qesa *qp, int ky, void *ptr)
  */
 boolean qesa_increment(qesa *qp, int ky)
 {
-   // check for space
+   // check for space and extend the array if needed
    if (ky > (qp->length - 1)) {
-      printf("error: (qesa_increment) index out of range.\n");
-      return false;
-    }
+      qp->length = ky + INIT_QESA_SIZE;
+      qp->arr = (void *)realloc(qp->arr, qp->length * sizeof(void *));
+      if (qp->arr == NULL) {
+         printf("error: (qesa_increment) realloc failed.\n");
+         return false;
+      }
+   }
 
-   // increment the integer value pointed by qp->arr[ky]
-   *((int *)qp->arr[ky]) = (*((int *)qp->arr[ky]) + 1);
+   // create a counter is first time accessed and then increment the
+   // integer value pointed by qp->arr[ky]
+   if (qp->arr[ky] == NULL) {
+      int *pi = (int *)malloc(sizeof(int));
+      *pi = 1;
+      qp->arr[ky] = (void *)pi;
+
+   } else {
+      *((int *)qp->arr[ky]) = (*((int *)qp->arr[ky]) + 1);
+   }
+   
+   // update qp->last if ky larger
+   if (ky > qp->last) qp->last = ky;
+   
    return true;
   
 } /*qesa_increment*/
@@ -198,7 +228,7 @@ boolean qesa_increment(qesa *qp, int ky)
 /*
   Prints a set st to file f with the spaces in between the elements.
 */
-void qesa_print(FILE *f, qesa *qp)
+void qesa_print(qesa *qp, FILE *f)
 {
    // print all elements from the beginning to the end of set
    for (int i = 0; i <= qp->last; i++) {
@@ -207,5 +237,22 @@ void qesa_print(FILE *f, qesa *qp)
    }
    
 } /*qesa_print*/
+
+/*
+  Prints indexdes and integer numbers (refs to ints) stored in qesa.
+  The use in set2hat: Indexes are the set lengths and the values are
+  integer numbers.
+*/
+void qesa_print_inxs(qesa *qp, FILE *f)
+{
+   // print int elements from the beginning to the end of set
+   for (int i = 1; i <= qp->last; i++) {
+      if (qp->arr[i] == NULL)
+         fprintf(f, "%d %d\n", i, 0);
+      else
+         fprintf(f, "%d %d\n", i, *((int *)(qp->arr[i])));
+   }
+   
+} /*qesa_print_inxs*/
 
 

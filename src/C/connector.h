@@ -33,16 +33,18 @@ typedef struct connector {
 /*---------------------------- Exported functions ------------------------------
  */
 
-extern connector* con_alloc( int len );
+extern connector* con_alloc();
 extern boolean con_free( connector *sp );
 extern boolean con_sort( connector *sp );
-extern int     con_size(connector *sp);
+extern int     con_size( connector *sp );
+extern void    con_print_keys( connector *sp, FILE *f );
 
 extern boolean con_member( connector *sp, int key );
 extern link*   con_lookup( connector *sp, int key );
 extern boolean con_open( connector* sp );
 extern boolean con_open_at( connector* sp, int key );
 extern link*   con_peek( connector *sp );
+extern link*   con_current(connector* sp);
 extern link*   con_read( connector *sp );
 extern boolean con_eos( connector *sp );
 extern boolean con_write( connector *sp, int key, void* val );

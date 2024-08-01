@@ -23,7 +23,7 @@
 /*
   Creating a new sequence on heap.
 */
-connector *con_alloc(int len)
+connector *con_alloc()
 {
    connector *sp = (connector *)malloc(sizeof(connector));
    if (sp == NULL) {
@@ -31,10 +31,10 @@ connector *con_alloc(int len)
       return NULL;
    }
 
-   sp->length = len;
+   sp->length = INIT_CONNECT_SIZE;
    sp->last = -1;
    sp->cursor = -1;
-   sp->seq = (link *)malloc(len * sizeof(link));
+   sp->seq = (link *)malloc(sp->length * sizeof(link));
    if (sp->seq == NULL) {
       printf("error: (con_create) mealloc failed.\n");
       return NULL;
@@ -97,6 +97,24 @@ int con_size(connector *sp)
    return ((sp->last) + 1);
 
 } /*con_size*/
+
+/*
+  Print the keys of the kv-store sp t file f. 
+ */
+void con_print_keys(connector *cp, FILE *f)
+{
+   // local vars
+   link *li = NULL;
+
+   // go through the kv-store frccom the beginning to the end
+   con_open(cp);
+   while (!con_eos(cp)) {
+     
+      li = con_read(cp);
+      fprintf(f, "%d\n", li->key);
+   }
+
+} /*con_print_keys*/
 
  /*
   Find a reference to a link with the given paremeter key. Use
@@ -204,8 +222,20 @@ link* con_peek(connector* sp)
 } /*con_peek*/
 
 /*
-  Read the next reference to object (value part of kv entry) using
-  cursor position.
+  Read the reference to the current key-value entry. Function returns
+  NULL if current position is out of bounds.
+ */
+link* con_current(connector* sp)
+{
+   if ((sp->cursor > sp->last) || (sp->cursor < 0))
+      return NULL;
+   else 
+      return &(sp->seq[sp->cursor]);
+} /*con_current*/
+
+/*
+  Read the reference to the next key-value entry using cursor
+  position.
  */
 link* con_read(connector* sp)
 {

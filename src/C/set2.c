@@ -76,7 +76,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
       int el2 = set_read(u2);
 
       // there is no connector in s2p; for both cases
-      s2p->sub.link = con_alloc(INIT_CONNECT_SIZE);
+      s2p->sub.link = con_alloc();
 
       if (el1 != el2) {
  	 // create and set set2-node for u1
@@ -689,7 +689,7 @@ void set2_wtf( FILE *f, set2_node *st, set *se )
 /*
   Store sets from set-trie st in left-deep first order to the file f.
  */
-void set2_store( FILE *f, set2_node *st )
+void set2_store( set2_node *st, FILE *f )
 {
    // set used to trace the descent path
    set *se = set_alloc();
