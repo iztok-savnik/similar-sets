@@ -201,7 +201,7 @@ void set2_insert( set2_node *st, set *se )
       } else {
 
 	 // child for el exists; just move there
-	s2p = (set2_node *)(lp->val);
+  	 s2p = (set2_node *)(lp->val);
       }
 
       // update min-max bounds
@@ -647,21 +647,21 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
 /*
   Write a set-trie to file in left-deep first order to the file f.
  */
-void set2_wtf( FILE *f, set2_node *st, set *se )
+void set2_wtf( FILE *f, set2_node *st, set *s1 )
 {
    // common pointer to link instances in set-trie
    link *li;
 
    // end of set in set2 node
    if (st->isset) {
-      set_print(f, se);
+      set_print(f, s1);
       fprintf(f, "\n");
       // no return: set may be followed by other supersets
    } 
 
    // end of set with tail
    if (st->istail) {
-      set_print(f, se);
+      set_print(f, s1);
       fprintf(f, " ");
       set_tl_print(f, st->sub.tail);
       fprintf(f, "\n");
@@ -679,9 +679,9 @@ void set2_wtf( FILE *f, set2_node *st, set *se )
    // go through all elements
    for (li = con_read(st->sub.link); li != NULL; li = con_read(st->sub.link)) {
 
-      set_push(se, li->key);
-      set2_wtf(f, (set2_node *)(li->val), se);
-      set_pop(se);
+      set_push(s1, li->key);
+      set2_wtf(f, (set2_node *)(li->val), s1);
+      set_pop(s1);
    }
 
 }/*set2_wtf*/
@@ -692,13 +692,13 @@ void set2_wtf( FILE *f, set2_node *st, set *se )
 void set2_store( set2_node *st, FILE *f )
 {
    // set used to trace the descent path
-   set *se = set_alloc();
+   set *s1 = set_alloc();
 
    // write a set-trie to file
-   set2_wtf(f, st, se);
+   set2_wtf(f, st, s1);
 
    // free the allocated set
-   set_free(se);
+   set_free(s1);
 } /*set2_store*/
 
 /*

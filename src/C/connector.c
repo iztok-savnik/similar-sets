@@ -234,6 +234,19 @@ link* con_current(connector* sp)
 } /*con_current*/
 
 /*
+  Read the reference to the predecessor of current key-value
+  entry. Function returns NULL if position of the predecessor is out
+  of bounds. The cursor is not altered.
+ */
+link* con_previous(connector* sp)
+{
+  if (((sp->cursor - 1) > sp->last) || ((sp->cursor - 1) < 0))
+      return NULL;
+   else 
+      return &(sp->seq[sp->cursor - 1]);
+} /*con_previous*/
+
+/*
   Read the reference to the next key-value entry using cursor
   position.
  */

@@ -204,9 +204,9 @@ int main( int argc, char *argv[] )
    con_print_keys(sh->tries, stdout);
    
    // printing a dataset from set-trie sh
-   //set2_store(stdout, st);
+   printf("Print sets stored in set-trie.\n");
+   s2h_store(sh, stdout);
    
-
    // foreach set from testset search simsets in st
    //apply_tests_to_strie_hmg(stdin, sh, &hmg);
    

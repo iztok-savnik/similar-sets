@@ -48,44 +48,49 @@ void s2h_free(set2_hat *sh)
 void s2h_insert(set2_hat *sh, set *se, int hmg)
 {
    int len = set_size(se);
-
+   link *lprv = NULL;
+   link *lcur = NULL;
+   link *lnxt = NULL;
+   
    // find exact position of len in a list of keys
    link *lfnd = con_lookup(sh->tries, len);
-   link *lcur = con_current(sh->tries);        
-   link *lnxt = con_peek(sh->tries);
 
    // the first interval does not have a beginning and ends with the
    // element that has associated link to a trie. This trie stores the
    // sets from the first interval. All further intervals start after
-   // an elemen and end with (including) the next element. The last
-   // element of the last interval represents the largest set from the
+   // an element and end with (including) the next element. The last
+   // element of the last interval represents the largest sets from the
    // dataset.
 
-   // lnxt should not be NULL (oterwise a mistake in partitioning)
-   if (lnxt != NULL) {
-      // in any case insert set se into trie assoc to lnxt, in case
-      // lfnd==NULL or not (but in the range).
+   // two cases: element len found or not
+   if (lfnd != NULL) {
 
-      if (lnxt->val == NULL) lnxt->val = (void *)set2_alloc();
-      set2_insert((set2_node *)(lnxt->val), se);
+      // to insert in current range
+      lprv = con_previous(sh->tries);
+      lcur = con_current(sh->tries);
+      lnxt = con_peek(sh->tries);
 
-      // now add to the upper neighboring partition if needed 
-      if (!con_eos(sh->tries) && ((lnxt->key - len) >= hmg)) {
- 	 con_read(sh->tries);
-	 link *lflw = con_peek(sh->tries);
-	 set2_insert((set2_node *)(lflw->val), se);
-      }   
-      
-      // and add to the lower neighboring partition if needed 
-      if (lcur!=NULL && ((len - lcur->key) >= hmg)) {
- 	 set2_insert((set2_node *)(lcur->val), se);
-      }
- 
-   } else { 
-      // must be a mistake since a kv sequence ends with the highest
-      // value by definition.
-      printf("error: (s2h_insert) set is too big?\n");
-      exit;
+   } else {
+
+      // to insert in next range
+      lprv = con_current(sh->tries);        
+      lcur = con_read(sh->tries);
+      lnxt = con_peek(sh->tries);
+   }
+
+   set_open(se);
+   set2_insert((set2_node *)(lcur->val), se);
+
+   // now add to the upper neighboring range if needed 
+   if ((lnxt != NULL) && ((lcur->key - len + 1) <= hmg)) {
+      set *s1 = set_copy(se);
+      set2_insert((set2_node *)(lnxt->val), s1);
+   }
+
+   // and add to the lower neighboring range if needed 
+   if ((lprv != NULL) && ((len - lprv->key) <= hmg)) {
+      set *s2 = set_copy(se);
+      set2_insert((set2_node *)(lprv->val), s2);
    }
       
 } /*s2h_insert*/
@@ -94,32 +99,34 @@ void s2h_insert(set2_hat *sh, set *se, int hmg)
   Search in set-trie sh the sets that are similar to the set se
   using the Hamming distance.
  */
- void s2h_simsearch_hmg(set2_hat *sh, set *se, int *hmg, qesa *qp)
- {
+void s2h_simsearch_hmg(set2_hat *sh, set *se, int *hmg, qesa *qp)
+{
+   // local vars
    int len = set_size(se);
    set *sp = set_alloc();
+   link *lcur = NULL;
    
    // find the range of len and then take the tree associated to the
    // last element in the range.
-   con_lookup(sh->tries, len);
-   //link *lcur = con_current(sh->tries);        
-   link *lnxt = con_peek(sh->tries);
+   link *lfnd = con_lookup(sh->tries, len);
+   if (lfnd != NULL)
+      // hit, so current eqals cursor
+      lcur = con_current(sh->tries);
+   else
+      // in between, current is low bound and next represents a
+      // range
+      lcur = con_read(sh->tries);
 
-   // lnxt should not be NULL (oterwise a mistake in partitioning)
-   if (lnxt != NULL) {
+   // lcur should either be below max length or above
+   if (lcur != NULL) {
 
-      // search in lnxt since it includes all sets of lenth within the
-      // range of lnxt.
-      set2_simsearch_hmg((set2_node *)(lnxt->val), se, sp, hmg, qp);
+      // lcur now represents the range with se length
+      set2_simsearch_hmg((set2_node *)(lcur->val), se, sp, hmg, qp);
 
-   } else { 
-      // must be a mistake since a kv sequence ends with the highest
-      // value by definition.
-      printf("error: (s2h_insert) set is too big?\n");
-      exit;
-   }
-         
- } /*s2h_simsearch_hmg*/
+   }  // else se length is above the max length of sets from index, so
+      // there can not be any match in index.
+      
+} /*s2h_simsearch_hmg*/
 
 /*
   Store sets from set-trie st in left-deep first order to the file f.
@@ -135,6 +142,7 @@ void s2h_store(set2_hat *sh, FILE *f)
    while (!con_eos(sh->tries)) {
      li = con_read(sh->tries);
      set2_store((set2_node *)(li->val), f);
+     fprintf(f, "--------------\n");
    }
   
 } /*s2h_store*/
@@ -186,6 +194,7 @@ void generate_mapping(set2_hat *sh, int part_size)
    // local vars
    int part_cnt = 1;  // partition counter
    int part_sum = 0;  // num of sets so far
+   int act_size = 0;  // num of sets so far
    int *pint = NULL;  // to be pntr to stat of one set length
    boolean pcnt_inc = false;  // catch last range 
 
@@ -202,8 +211,8 @@ void generate_mapping(set2_hat *sh, int part_size)
       // add num of sets of current length (pint) to sum
       pint = (int *)qesa_read(sh->stats);
       if (pint != NULL) {
-	 if (*pint >= part_size) *pint = part_size;
-         part_sum += *pint;
+	 if (*pint >= part_size) part_sum += part_size;
+         else part_sum += *pint;
       }
 
       // index incremented by one at least
@@ -281,7 +290,8 @@ set2_hat *s2h_load(FILE *f, int psize, int hmg)
    generate_mapping(sh, psize);
 
    // load sets from a dataset into a range of tries
-   //load_dataset(sh, f, hmg);
+   rewind(f);
+   load_dataset(sh, f, hmg);
 
    // return set-trie with hat
    return sh;
