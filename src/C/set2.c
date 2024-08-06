@@ -48,7 +48,7 @@ void set2_free( set2_node *st )
  */
 void update_bounds( set2_node *st, set *su )
 {
-   int sulen = set_tl_length(su);
+   int sulen = set_tl_size(su);
    if ((sulen < (st->min)) || ((st->min) == -1)) {
       st->min = sulen;
    }
@@ -90,7 +90,8 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
  	    sn1->ndset = u1;
 	 } else {
 	    sn1->istail = true;
-	    sn1->sub.tail = u1;
+	    sn1->sub.tail.set = u1;
+	    sn1->sub.tail.cursor = set_get_cursor(u1);
 	 }
 	 con_insert(s2p->sub.link, el1, (void *)sn1);
 
@@ -105,7 +106,8 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 	    sn2->ndset = u2;
 	 } else {
 	    sn2->istail = true;
-	    sn2->sub.tail = u2;
+	    sn2->sub.tail.set = u2;
+	    sn2->sub.tail.cursor = set_get_cursor(u2);
 	 }
 	 con_insert(s2p->sub.link, el2, (void *)sn2);
 	 
@@ -129,10 +131,11 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 
    // the only case when s2p->sub.link stays NULL
    // u1 = u2;
-   // !!!one of sets should be disposed
+   // !!! one of sets should be disposed
    if (set_eos(u1) && set_eos(u2)) {
       s2p->isset = true;
       s2p->ndset = u2;
+      set_free(u1);   
       return;
    }
    // end of u1
@@ -140,14 +143,16 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
       s2p->isset = true;
       s2p->ndset = u1;
       s2p->istail = true;
-      s2p->sub.tail = u2;
+      s2p->sub.tail.set = u2;
+      s2p->sub.tail.cursor = set_get_cursor(u2);
 
    // end of u2
    } else {
       s2p->isset = true;
       s2p->ndset = u2;
       s2p->istail = true;
-      s2p->sub.tail = u1;
+      s2p->sub.tail.set = u1;
+      s2p->sub.tail.cursor = set_get_cursor(u1);
       
    }
 } /*set2_insert_merge*/
@@ -170,7 +175,8 @@ void set2_insert( set2_node *st, set *se )
 
       // inserting into tail set
       if (s2p->istail) {
-         sp = s2p->sub.tail;       
+	 sp = s2p->sub.tail.set;   // these are in union    
+         set_restore_cursor(sp, s2p->sub.tail.cursor);
 	 s2p->sub.link = NULL;
 
 	 // no more tail & merge sp and se in sub-trie
@@ -178,13 +184,14 @@ void set2_insert( set2_node *st, set *se )
          set2_insert_merge(s2p, sp, se);
 	 return;
       }
-
+      
       // newly created set2-node?
       if (s2p->sub.link == NULL) {
 
  	 // create tail set
  	 s2p->istail = true;
-	 s2p->sub.tail = se;
+	 s2p->sub.tail.set = se;
+	 s2p->sub.tail.cursor = set_get_cursor(se);
          return;
       }
 
@@ -228,7 +235,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
    int selen = 0;
    
    // check the length of se tail against the min-max bounds
-   selen = set_tl_length(se);
+   selen = set_tl_size(se);
    //printf("selen=%d, st-min=%d, st-max=%d, hmg=%d\n", selen, (st->min), (st->max), (*hmg));
    if ( ((selen + (*hmg)) < st->min) || (selen > (st->max + (*hmg)))) {
       // too big even if all hmg used || too small even all hmg used
@@ -241,7 +248,7 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
 
       // sp is similar to se if length of se's tail is less than or
       // equal to number of skipped elements in se.
-      if (((*hmg) - set_tl_length(se)) >= 0) {
+      if (((*hmg) - set_tl_size(se)) >= 0) {
 
 	qesa_write(qp, (void *)(st->ndset));
       }
@@ -260,10 +267,13 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // save hmg
       int tmphmg = *hmg;
 
-      // check if tail in st is similar to the rest of se
-      if (set_tl_similar_hmg(st->sub.tail, se, hmg)) {
+      // restore cursor in st->sub.tail.set
+      set_restore_cursor(st->sub.tail.set, st->sub.tail.cursor);
 
-	 qesa_write(qp, (void *)(st->sub.tail));
+      // check if tail in st is similar to the rest of se
+      if (set_tl_similar_hmg(st->sub.tail.set, se, hmg)) {
+
+	 qesa_write(qp, (void *)(st->sub.tail.set));
       }
 
       // restire hmg
@@ -442,7 +452,7 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
 
       // sp is similar to se if length of se's tail is less than or
       // equal to number of skipped elements in se.
-      int tmp_skp = (*skp) - set_tl_length(se);
+      int tmp_skp = (*skp) - set_tl_size(se);
       if (tmp_skp >= 0) {
 
 	 qesa_write(qp, (void *)set_copy(sp));
@@ -469,9 +479,9 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
       int tmp_add = *add;
 
       // check if tail in st is similar to the rest of se
-      if (set_tl_similar_lcs(st->sub.tail, se, skp, add)) {
+      if (set_tl_similar_lcs(st->sub.tail.set, se, skp, add)) {
 
-	 qesa_write(qp, (void *)(st->sub.tail));
+	 qesa_write(qp, (void *)(st->sub.tail.set));
          // left for testing. should be the same as st->sub.tail
          //set_print(stdout, sp);
          //fprintf(stdout, " ");
@@ -661,9 +671,10 @@ void set2_wtf( FILE *f, set2_node *st, set *s1 )
 
    // end of set with tail
    if (st->istail) {
-      set_print(f, s1);
+      set_print(f, st->sub.tail.set);
+      /*set_print(f, s1);    
       fprintf(f, " ");
-      set_tl_print(f, st->sub.tail);
+      set_tl_print(f, st->sub.tail.set);*/
       fprintf(f, "\n");
       return;
    } 

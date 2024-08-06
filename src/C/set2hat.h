@@ -39,7 +39,7 @@ extern set2_hat* s2h_alloc();
 extern void s2h_free( set2_hat *sh );
 
 extern void s2h_insert( set2_hat *sh, set *se, int hmg );
-extern void s2h_simsearch_hmg( set2_hat *sh, set *se, int *hmg, qesa *qt );
+extern void s2h_simsearch_hmg( set2_hat *sh, set *se, set *sp, int *hmg, qesa *qt );
 
 extern set2_hat* s2h_load( FILE *f, int psize, int hmg );
 extern void s2h_store( set2_hat *sh, FILE *f );

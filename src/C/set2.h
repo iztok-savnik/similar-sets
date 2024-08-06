@@ -35,7 +35,11 @@ typedef struct set2_node {
    set *ndset;       // node set stored if isset
    union {
       connector *link; // reference to an instance of a kvstore 
-      set *tail;       // reference to set; tail of a set sequence 
+      struct {
+         set *set;    // reference to set; tail of a set sequence
+  	 int cursor;  // saved tail cursor (since a set is in multiple
+		      // tries)
+      } tail;
    } sub;
    int min;   // min set that goes through this node 
    int max;   // max set that goes through this node

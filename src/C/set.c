@@ -356,17 +356,36 @@ void set_print(FILE *f, set *sp)
           fprintf(f, " %d", sp->arr[i]);
       }
    }
+   fprintf(f, ", %d", set_size(sp));
    
 } /*set_print*/
 
 /*
+  Retrieves the current value of sp's cursor.
+*/
+int set_get_cursor(set *sp)
+{
+   return sp->cursor;
+   
+} /*set_get_cursor*/
+
+/*
+  Restores sp's cursor to the value of the parameter cur.
+*/
+void set_restore_cursor(set *sp, int cur)
+{
+   sp->cursor = cur;
+   
+} /*set_restore_cursor*/
+
+/*
   Returns the size of tail: from cursor+1 to (including) last.
  */
-int set_tl_length(set *sp )
+int set_tl_size(set *sp )
 {
    return (sp->last - sp->cursor);
 
-} /*set_size*/
+} /*set_tl_size*/
 
 /*
   Prints the tail, i.e., from cursor+1 to (including) last, to file f.
@@ -464,7 +483,7 @@ boolean set_tl_similar_lcs( set *sp, set *se, int *skp, int *add )
    if (set_eos(sp)) {
     
       // true only if remaining elems from se can be skipped
-      *skp -= set_tl_length(se);
+      *skp -= set_tl_size(se);
       rtval = (*skp) >= 0; 
 
       // restore cursors
@@ -475,7 +494,7 @@ boolean set_tl_similar_lcs( set *sp, set *se, int *skp, int *add )
    } else { // set_eos(se) && !set_eos(sp)
 
       // true only if remaining elems from sp can be added
-      *add -= set_tl_length(sp);
+      *add -= set_tl_size(sp);
       rtval = (*add) >= 0;
       
       // restore cursors
@@ -563,7 +582,7 @@ boolean set_tl_similar_hmg( set *sp, set *se, int *hmg )
    if (set_eos(sp)) {
     
       // true only if remaining elems from se can be skipped
-      *hmg -= set_tl_length(se);
+      *hmg -= set_tl_size(se);
       rtval = (*hmg) >= 0; 
 
       // restore cursors
@@ -574,7 +593,7 @@ boolean set_tl_similar_hmg( set *sp, set *se, int *hmg )
    } else { // set_eos(se) && !set_eos(sp)
 
       // true only if remaining elems from sp can be added
-      *hmg -= set_tl_length(sp);
+      *hmg -= set_tl_size(sp);
       rtval = (*hmg) >= 0;
       
       // restore cursors

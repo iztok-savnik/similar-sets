@@ -83,14 +83,16 @@ void s2h_insert(set2_hat *sh, set *se, int hmg)
 
    // now add to the upper neighboring range if needed 
    if ((lnxt != NULL) && ((lcur->key - len + 1) <= hmg)) {
-      set *s1 = set_copy(se);
-      set2_insert((set2_node *)(lnxt->val), s1);
+      //set *s1 = set_copy(se);
+      set_open(se);
+      set2_insert((set2_node *)(lnxt->val), se);
    }
 
    // and add to the lower neighboring range if needed 
    if ((lprv != NULL) && ((len - lprv->key) <= hmg)) {
-      set *s2 = set_copy(se);
-      set2_insert((set2_node *)(lprv->val), s2);
+      //set *s2 = set_copy(se);
+      set_open(se);
+      set2_insert((set2_node *)(lprv->val), se);
    }
       
 } /*s2h_insert*/
@@ -99,11 +101,11 @@ void s2h_insert(set2_hat *sh, set *se, int hmg)
   Search in set-trie sh the sets that are similar to the set se
   using the Hamming distance.
  */
-void s2h_simsearch_hmg(set2_hat *sh, set *se, int *hmg, qesa *qp)
+void s2h_simsearch_hmg(set2_hat *sh, set *se, set *sp, int *hmg, qesa *qp)
 {
    // local vars
    int len = set_size(se);
-   set *sp = set_alloc();
+   //set *sp = set_alloc();
    link *lcur = NULL;
    
    // find the range of len and then take the tree associated to the
@@ -125,7 +127,7 @@ void s2h_simsearch_hmg(set2_hat *sh, set *se, int *hmg, qesa *qp)
 
    }  // else se length is above the max length of sets from index, so
       // there can not be any match in index.
-      
+
 } /*s2h_simsearch_hmg*/
 
 /*

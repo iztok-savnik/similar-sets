@@ -106,7 +106,7 @@ void apply_tests_to_strie_lcs( FILE *f, set2_node *st, int *add, int *skp ) {
 /*
  * Apply test join using Hamming measure.
  */
-void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
+void apply_tests_to_strie_hmg( FILE *f, set2_hat *sh, int *hmg ) {
 
    // save simsearch params
    int d1 = *hmg;
@@ -158,7 +158,7 @@ void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
       clock_gettime(CLOCK_MONOTONIC, &start);
 
       // find in st the sets that are similar to s1
-      set2_simsearch_hmg(st, s1, sp, hmg, q1);
+      s2h_simsearch_hmg(sh, s1, sp, hmg, q1);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
       elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
