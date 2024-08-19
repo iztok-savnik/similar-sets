@@ -27,7 +27,7 @@ qesa *qesa_alloc()
    qp->length = INIT_QESA_SIZE;
    qp->last = -1;
    qp->cursor = -1;
-   qp->arr = (void *)malloc(INIT_QESA_SIZE * sizeof(qesa));
+   qp->arr = (void *)malloc(INIT_QESA_SIZE * sizeof(void *));
    if (qp->arr == NULL) {
       printf("error: (qesa_alloc) malloc array failed.\n");
       return NULL;
@@ -41,8 +41,15 @@ qesa *qesa_alloc()
  */
 boolean qesa_free(qesa *qp)
 {
+   // dispose structures referenced in arr
+   for (int i = 0; i <=  qp->last; i++)
+      if (qp->arr[i] != NULL)
+	 free(qp->arr[i]);
+
+   // free array of pointers and qesa structure 
    free(qp->arr);
    free(qp);
+   
    return true;
 } /*qesa_free*/
 

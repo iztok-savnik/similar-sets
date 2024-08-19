@@ -148,6 +148,9 @@ void apply_tests_to_strie_hmg( FILE *f, set2_hat *sh, int *hmg ) {
       set_print(stdout, s1);
       printf("\n");
       
+      // skip if length of se is smaller or eqal to hmg.
+      //if (set_size(s1) < *hmg) continue;
+   
       // reset set sp and simsearch params
       set_open(s1);
       set_reset(sp);
@@ -196,19 +199,20 @@ int main( int argc, char *argv[] )
    fclose(infile);
 
    // printing statistics of the lengths of sets from a dataset
-   printf("Statistics of set lengths.\n");
-   qesa_print_inxs(sh->stats, stdout);
+   //printf("Statistics of set lengths.\n");
+   //qesa_print_inxs(sh->stats, stdout);
    
    // printing the mapping based on set length
-   printf("Print keys of a kvs (mapping).\n");
-   con_print_keys(sh->tries, stdout);
+   //printf("Print keys of a kvs (mapping).\n");
+   //con_print_keys(sh->tries, stdout);
    
    // printing a dataset from set-trie sh
-   printf("Print sets stored in set-trie.\n");
-   s2h_store(sh, stdout);
+   //printf("Print sets stored in set-trie.\n");
+   //s2h_store(sh, stdout);
    
    // foreach set from testset search simsets in st
-   //apply_tests_to_strie_hmg(stdin, sh, &hmg);
+   //printf("Print results of tests.\n");
+   apply_tests_to_strie_hmg(stdin, sh, &hmg);
    
 } /*main*/
 

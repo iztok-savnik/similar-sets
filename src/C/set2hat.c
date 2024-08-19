@@ -51,6 +51,7 @@ void s2h_insert(set2_hat *sh, set *se, int hmg)
    link *lprv = NULL;
    link *lcur = NULL;
    link *lnxt = NULL;
+   int prv_cur = -1;
    
    // find exact position of len in a list of keys
    link *lfnd = con_lookup(sh->tries, len);
@@ -66,33 +67,44 @@ void s2h_insert(set2_hat *sh, set *se, int hmg)
    if (lfnd != NULL) {
 
       // to insert in current range
-      lprv = con_previous(sh->tries);
+      prv_cur = con_get_cursor(sh->tries) - 1;
+      lprv = con_peek_prev(sh->tries);
       lcur = con_current(sh->tries);
-      lnxt = con_peek(sh->tries);
+      lnxt = con_read(sh->tries);
 
    } else {
 
       // to insert in next range
+      prv_cur = con_get_cursor(sh->tries);
       lprv = con_current(sh->tries);        
-      lcur = con_read(sh->tries);
-      lnxt = con_peek(sh->tries);
+      lcur = con_read(sh->tries);   // lcur must exist!
+      lnxt = con_read(sh->tries);
    }
 
+   // insert se first in main range of sequence lens
    set_open(se);
    set2_insert((set2_node *)(lcur->val), se);
 
    // now add to the upper neighboring range if needed 
-   if ((lnxt != NULL) && ((lcur->key - len + 1) <= hmg)) {
+   while ((lnxt != NULL) && ((lcur->key - len + 1) <= hmg)) {
       //set *s1 = set_copy(se);
       set_open(se);
       set2_insert((set2_node *)(lnxt->val), se);
+
+      // now move to next range
+      lcur = lnxt;
+      lnxt = con_read(sh->tries);
    }
 
-   // and add to the lower neighboring range if needed 
-   if ((lprv != NULL) && ((len - lprv->key) <= hmg)) {
+   // add to the lower neighboring range if needed 
+   con_set_cursor(sh->tries, prv_cur);
+   while ((lprv != NULL) && ((len - lprv->key) <= hmg)) {
       //set *s2 = set_copy(se);
       set_open(se);
       set2_insert((set2_node *)(lprv->val), se);
+
+      // now move to previous range
+      lprv = con_read_prev(sh->tries);
    }
       
 } /*s2h_insert*/
@@ -113,10 +125,10 @@ void s2h_simsearch_hmg(set2_hat *sh, set *se, set *sp, int *hmg, qesa *qp)
    link *lfnd = con_lookup(sh->tries, len);
    if (lfnd != NULL)
       // hit, so current eqals cursor
-      lcur = con_current(sh->tries);
+      lcur = lfnd;
    else
       // in between, current is low bound and next represents a
-      // range
+      // range. note that lfnd is now previous link.
       lcur = con_read(sh->tries);
 
    // lcur should either be below max length or above
@@ -125,8 +137,9 @@ void s2h_simsearch_hmg(set2_hat *sh, set *se, set *sp, int *hmg, qesa *qp)
       // lcur now represents the range with se length
       set2_simsearch_hmg((set2_node *)(lcur->val), se, sp, hmg, qp);
 
-   }  // else se length is above the max length of sets from index, so
-      // there can not be any match in index.
+   }  // else se length is above the max length of sets from index, but
+      // there can still be a match in index if
+      // len < (lfnd->key + *hmg). Implement?
 
 } /*s2h_simsearch_hmg*/
 
@@ -136,15 +149,24 @@ void s2h_simsearch_hmg(set2_hat *sh, set *se, set *sp, int *hmg, qesa *qp)
 void s2h_store(set2_hat *sh, FILE *f)
 {
    // function variables
-   link *li = NULL;
+   link *lprv = NULL;
+   link *lcur = NULL;
 
    // open kv store and read sequentially the kv-pairs.
    con_open(sh->tries);
 
    while (!con_eos(sh->tries)) {
-     li = con_read(sh->tries);
-     set2_store((set2_node *)(li->val), f);
-     fprintf(f, "--------------\n");
+
+       // read next link
+      lcur = con_read(sh->tries);
+      if (lprv == NULL)
+         fprintf(f, "Range = 1 - %d\n", lcur->key);
+      else
+         fprintf(f, "Range = %d - %d\n", lprv->key + 1, lcur->key);
+      set2_store((set2_node *)(lcur->val), f);
+        
+      // move to next range
+      lprv = lcur;
    }
   
 } /*s2h_store*/
@@ -237,6 +259,11 @@ void generate_mapping(set2_hat *sh, int part_size)
       set2_node *st = set2_alloc();
       con_write(sh->tries, qesa_cursor(sh->stats), (void *)st);
    }
+
+   // free qesa,it is not needed any more
+   //printf("Statistics of set lengths.\n");
+   //qesa_print_inxs(sh->stats, stdout);
+   qesa_free(sh->stats); 
    
 } /*generate_mapping*/
 

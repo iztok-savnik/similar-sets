@@ -222,6 +222,18 @@ link* con_peek(connector* sp)
 } /*con_peek*/
 
 /*
+  Read the reference to the next key-value entry using cursor
+  position.
+ */
+link* con_read(connector* sp)
+{
+   if (sp->cursor >= sp->last)
+      return NULL;
+   else 
+      return &(sp->seq[++(sp->cursor)]);
+} /*con_read*/
+
+/*
   Read the reference to the current key-value entry. Function returns
   NULL if current position is out of bounds.
  */
@@ -234,29 +246,30 @@ link* con_current(connector* sp)
 } /*con_current*/
 
 /*
-  Read the reference to the predecessor of current key-value
+  Peek the reference to the predecessor of current key-value
   entry. Function returns NULL if position of the predecessor is out
   of bounds. The cursor is not altered.
  */
-link* con_previous(connector* sp)
+link* con_peek_prev(connector* sp)
 {
   if (((sp->cursor - 1) > sp->last) || ((sp->cursor - 1) < 0))
       return NULL;
    else 
       return &(sp->seq[sp->cursor - 1]);
-} /*con_previous*/
+} /*con_peek_prev*/
 
 /*
-  Read the reference to the next key-value entry using cursor
-  position.
+  Read the reference to the predecessor of current key-value
+  entry. Function returns NULL if position of the predecessor is out
+  of bounds. The cursor is not altered.
  */
-link* con_read(connector* sp)
+link* con_read_prev(connector* sp)
 {
-   if (sp->cursor >= sp->last)
+  if (((sp->cursor - 1) > sp->last) || ((sp->cursor - 1) < 0))
       return NULL;
    else 
-      return &(sp->seq[++(sp->cursor)]);
-} /*con_read*/
+      return &(sp->seq[--(sp->cursor)]);
+} /*con_read_prev*/
 
 /*
   Test if current index of a sequence is at the end of sequence.
@@ -322,3 +335,20 @@ boolean con_insert( connector *sp, int key, void* pvl )
    return true;
   
 } /*con_insert*/
+
+/*
+  Return the current cursor.
+ */
+int con_get_cursor(connector* sp)
+{
+   return sp->cursor;
+} /*con_get_cursor*/
+
+/*
+  Set the cursor to parameter cur.
+ */
+void con_set_cursor(connector* sp, int cur)
+{
+   sp->cursor = cur;
+} /*con_set_cursor*/
+

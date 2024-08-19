@@ -44,11 +44,15 @@ extern link*   con_lookup( connector *sp, int key );
 extern boolean con_open( connector* sp );
 extern boolean con_open_at( connector* sp, int key );
 extern link*   con_peek( connector *sp );
-extern link*   con_current( connector* sp );
-extern link*   con_previous( connector* sp );
 extern link*   con_read( connector *sp );
+extern link*   con_current( connector* sp );
+extern link*   con_peek_prev( connector* sp );
+extern link*   con_read_prev( connector* sp );
 extern boolean con_eos( connector *sp );
 extern boolean con_write( connector *sp, int key, void* val );
 extern boolean con_insert( connector *sp, int key, void* val );
+
+extern int  con_get_cursor( connector *sp );
+extern void con_set_cursor( connector *sp, int cur );
 
 #endif /* CONNECTOR_H */
