@@ -233,12 +233,13 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
    int cnl = 0;           // count delete operations
    link *li = NULL;
    int selen = 0;
+   int sslen = 0;
    
    // check the length of se tail against the min-max bounds
    selen = set_tl_size(se);
    //printf("selen=%d, st-min=%d, st-max=%d, hmg=%d\n", selen, (st->min), (st->max), (*hmg));
    if ( ((selen + (*hmg)) < st->min) || (selen > (st->max + (*hmg)))) {
-      // too big even if all hmg used || too small even all hmg used
+      // too small even all hmg used || too big even if all hmg used 
       //printf("hit\n"); 
       return;
    }
@@ -250,15 +251,16 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // equal to number of skipped elements in se.
       if (((*hmg) - set_tl_size(se)) >= 0) {
 
-	qesa_write(qp, (void *)(st->ndset));
+ 	 qesa_write(qp, (void *)(st->ndset));
       }
 
       // return if connector was not created
-      if (st->sub.link == NULL) {
-
-	 // nothing else to do
-	 return;
-      }
+      // check again !!!
+      //if (st->sub.link == NULL) {
+      //
+      //   // nothing else to do
+      //   return;
+      //}
    }
 
    // are we in a tail?
@@ -270,14 +272,27 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // restore cursor in st->sub.tail.set
       set_restore_cursor(st->sub.tail.set, st->sub.tail.cursor);
 
+      // check the lengths of sets
+      sslen = set_tl_size(st->sub.tail.set);
+      if (abs(selen - sslen) > tmphmg) {
+	 // printf("hit\n");
+	 return;
+      }
+		  
       // check if tail in st is similar to the rest of se
-      if (set_tl_similar_hmg(st->sub.tail.set, se, hmg)) {
+      if (set_tl_similar_rev_hmg(st->sub.tail.set, se, hmg)) {
 
 	 qesa_write(qp, (void *)(st->sub.tail.set));
       }
 
       // restire hmg
       *hmg = tmphmg;
+      return;
+   }
+
+   // return if connector was not created
+   if (st->sub.link == NULL) {
+      // nothing else to do
       return;
    }
 

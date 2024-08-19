@@ -154,6 +154,10 @@ void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
       qesa_reset(q1);
       *hmg = d1;
       
+      // skip if length of s1 is smaller or eqal to hmg.
+      //printf("s1=%d, hmg=%d\n", set_size(s1), d1);
+      //if (set_size(s1) <= *hmg) continue;
+
       // measure elapsed time
       clock_gettime(CLOCK_MONOTONIC, &start);
 

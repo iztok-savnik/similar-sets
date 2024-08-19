@@ -46,6 +46,8 @@ extern boolean set_eos( set *sp );
 extern boolean set_push( set *sp, int el );
 extern int     set_pop( set *sp );
 extern set*    set_copy( set *sp );
+extern void    set_put( set *sp, int ix, int el );
+extern int     set_get( set *sp, int ix );
 extern void    set_print( FILE *f, set *sp );
 
 extern int     set_get_cursor( set *sp );
@@ -55,5 +57,6 @@ extern int     set_tl_size( set *sp );
 extern void    set_tl_print( FILE *f, set *sp );
 extern boolean set_tl_similar_lcs( set *sp, set *se, int *skp, int *add );
 extern boolean set_tl_similar_hmg( set *sp, set *se, int *hmg );
+extern boolean set_tl_similar_rev_hmg( set *sp, set *se, int *hmg );
 
 #endif /* SET_H */

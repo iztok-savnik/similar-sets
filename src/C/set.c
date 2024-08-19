@@ -114,7 +114,7 @@ int set_length(set *sp )
 
 /*
   Get an element of the parameter set sp with the index ix.
-  OBSOLATE.
+  No model, not safe.
  */
 int set_get(set *sp, int ix )
 {
@@ -124,13 +124,12 @@ int set_get(set *sp, int ix )
 
 /*
   Put the element el in the set sp at the index ix. 
-  OBSOLATE.
+  No model, not safe.
  */
-boolean set_put(set *sp, int ix, int el)
+void set_put(set *sp, int ix, int el)
 {
    // check index ?
    sp->arr[ix] = el;
-   return true;
 
 } /*set_put*/
 
@@ -356,7 +355,7 @@ void set_print(FILE *f, set *sp)
           fprintf(f, " %d", sp->arr[i]);
       }
    }
-   fprintf(f, ", %d", set_size(sp));
+   //fprintf(f, ", %d", set_size(sp));
    
 } /*set_print*/
 
@@ -602,5 +601,109 @@ boolean set_tl_similar_hmg( set *sp, set *se, int *hmg )
       return rtval;
    }   
 } /*set_tl_similar_hmg*/
+
+/*
+  Compares two sets for similarity using Hamming distance in reverse
+  order. Set elements are sorted from the most frequent towards less
+  frequent. Starting from the least frequent element gincreases the probability to identify the 
+
+  Returns true if similar and false otherwise. After the function
+  completes execution the cursor in both sets stays at the same
+  position as before function call.
+ */
+boolean set_tl_similar_rev_hmg( set *sp, set *se, int *hmg )
+{
+   // elements from sp and se
+   int esp = 0;           // element from sp
+   int ese = 0;           // element from se
+   int csp = sp->cursor;  // remember original positions 
+   int cse = se->cursor;  // of cursors
+   int isp = sp->last;
+   int ise = se->last;
+   boolean rtval;         // return value
+   
+   while ((isp > csp) && (ise > cse)) {
+
+      esp = set_get(sp, isp);
+      ese = set_get(se, ise);
+
+      if (esp == ese) {
+
+  	 // move the cursors
+	 isp--;;
+	 ise--;
+	 continue;
+
+      } else {
+
+	 // add an element to result sp if permitted
+ 	 if (esp > ese) {
+
+	    if (*hmg > 0) {
+	       isp--;
+	       (*hmg)--;
+	       continue;
+	       
+	    } else {
+
+	       // no more adding; restore cursors
+	       sp->cursor = csp;
+	       se->cursor = cse;
+	       return false;   
+	    }
+	   
+	 } else {
+
+	    // skip an element from se if still possible
+	    if (*hmg > 0) {
+	       ise--;
+	       (*hmg)--;
+	       continue;
+	       
+	    } else {
+
+	       // no more skipping; restore the cursors
+	       sp->cursor = csp;
+	       se->cursor = cse;
+	       return false;   
+	    }
+         }
+      } 
+   } // while
+
+   // handle tails
+   if ((isp <= csp) && (ise <= cse)) {
+
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+
+      // hmg >= 0.
+      return true;
+   }
+   
+   if (isp <= csp) {
+    
+      // true only if remaining elems from se can be skipped
+      *hmg -= ise - cse;
+      rtval = (*hmg) >= 0; 
+
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+      return rtval;
+
+   } else { // ise <= cse
+
+      // true only if remaining elems from sp can be added
+      *hmg -= isp - csp;
+      rtval = (*hmg) >= 0;
+      
+      // restore cursors
+      sp->cursor = csp;
+      se->cursor = cse;
+      return rtval;
+   }   
+} /*set_tl_similar_rev_hmg*/
 
 
