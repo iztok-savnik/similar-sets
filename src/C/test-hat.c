@@ -230,7 +230,7 @@ int old_main( int argc, char *argv[] )
    fclose(infile);
 
    printf("-------Creating set s1.\n");
-   set *s1 = set_alloc(10);
+   set *s1 = set_alloc();
 
    //int a1[] = {3,4,5,6,8,9,10,14,15,18};
    //int a1[] = {0,1,4,5,6};
@@ -253,7 +253,7 @@ int old_main( int argc, char *argv[] )
    set_print(stdout, s1); printf("\n");
 
    printf("-------Creating set sp.\n");
-   set *sp = set_alloc(10);
+   set *sp = set_alloc();
 
    int add = 1;
    int skp = 1;

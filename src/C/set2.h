@@ -46,7 +46,11 @@ typedef struct set2_node {
    int cnt;   // number of sets in trie with a given prefix */	
 } set2_node;
 
+
 /*---------------------- Exported functions ------------------------------*/
+
+extern int cnt_leafs;
+extern int sum_leafpaths;
 
 extern set2_node* set2_alloc();
 extern void set2_free( set2_node *st );
@@ -55,6 +59,8 @@ extern void set2_insert( set2_node *st, set *se );
 extern void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qesa *qt );
 extern void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qt );
 
+extern void set2_avg_height( set2_node *st, set *s1 );
+extern void set2_wtf( FILE *f, set2_node *st, set *s1 );
 extern set2_node* set2_load( FILE *f );
 extern void set2_store( set2_node *st, FILE *f );
 

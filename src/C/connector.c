@@ -99,14 +99,14 @@ int con_size(connector *sp)
 } /*con_size*/
 
 /*
-  Print the keys of the kv-store sp t file f. 
+  Print the keys of the kv-store sp to file f. 
  */
 void con_print_keys(connector *cp, FILE *f)
 {
    // local vars
    link *li = NULL;
 
-   // go through the kv-store frccom the beginning to the end
+   // go through the kv-store from the beginning to the end
    con_open(cp);
    while (!con_eos(cp)) {
      
@@ -259,9 +259,10 @@ link* con_peek_prev(connector* sp)
 } /*con_peek_prev*/
 
 /*
-  Read the reference to the predecessor of current key-value
-  entry. Function returns NULL if position of the predecessor is out
-  of bounds. The cursor is not altered.
+  Read and return the reference to the predecessor of current
+  key-value entry. The cursor is updated to point to
+  predecessor. Function returns NULL if position of the predecessor is
+  out of bounds.
  */
 link* con_read_prev(connector* sp)
 {

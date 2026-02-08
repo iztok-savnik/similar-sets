@@ -19,6 +19,13 @@
 #include "set2.h"
  
 /*
+  Statistics of the sizes of paths from the root to leafs of a
+  set-trie.
+*/
+int cnt_leafs = 0;
+int sum_leafpaths = 0;
+
+/*
   Create a new set-trie.
  */
 set2_node *set2_alloc()
@@ -76,7 +83,10 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
       int el2 = set_read(u2);
 
       // there is no connector in s2p; for both cases
+      // 1) first s2p in merge => s2p must be a tail => no children
+      // 2) newly created s2p => s2p does not have children
       s2p->sub.link = con_alloc();
+      s2p->istail = false;   // since it has children
 
       if (el1 != el2) {
  	 // create and set set2-node for u1
@@ -125,6 +135,7 @@ void set2_insert_merge( set2_node *st, set *u1, set *u2 )
 
 	 // link s2p to sn1 through el1.
 	 con_insert(s2p->sub.link, el1, (void *)sn1);
+         s2p->istail = false;   // now it is definitely not a tail
 	 s2p = sn1;
       }
    }
@@ -668,6 +679,78 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
    return;
    
 } /*set2_simsearch_lcs*/
+
+/*
+  Function visits all nodes of a set-trie in a left-deep first
+  order. Compute the average height of a set-trie in the module
+  variabes cnt_leafs and sum_leafpaths. The set s1 represents the
+  elements from the path to the root.
+ */
+void set2_avg_height( set2_node *st, set *s1 )
+{
+   // common pointer to link instances in set-trie
+   link *li;
+
+   // end of set in set2 node
+   //if (st->isset) {
+   //   set_print(f, s1);
+   //   fprintf(f, "\n");
+   //   // no return: set may be followed by other supersets
+   //} 
+
+   // end-of-path node with a tail
+   if (st->istail) {
+
+      //if (st->sub.link != NULL) {
+      //   printf("error: istail node has sub-links defined.\n");
+      //}
+
+      // update statistics
+      cnt_leafs += 1;
+      sum_leafpaths += set_size(s1);
+      
+      set_print(stdout, s1);    
+      //fprintf(f, " ");
+      //set_tl_print(f, st->sub.tail.set);
+      fprintf(stdout, "\n");
+      return;
+      
+   } else {
+
+      // maybe the set ends in this node
+      if (st->sub.link == NULL) {
+
+	 // Ok if this is a set
+	 if (st->isset) {
+
+	    // update statistics
+            cnt_leafs += 1;
+            sum_leafpaths += set_size(s1);
+
+            set_print(stdout, s1);    
+            fprintf(stdout, "\n");
+
+         } else {
+
+	    printf("error: sub.link=NULL node is not a set.\n");
+	 }
+	 
+	 return;
+      }
+   }
+   
+   // open read access to connector
+   con_open(st->sub.link);
+
+   // go through all elements
+   for (li = con_read(st->sub.link); li != NULL; li = con_read(st->sub.link)) {
+
+      set_push(s1, li->key);
+      set2_avg_height((set2_node *)(li->val), s1);
+      set_pop(s1);
+   }
+
+}/*set2_avg_height*/
 
 /*
   Write a set-trie to file in left-deep first order to the file f.
