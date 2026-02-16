@@ -1,9 +1,9 @@
 CC = gcc
 LINK = ld
-CFLAGS = -g
+CFLAGS = -O3
 OBJECTS1 = config.o set.o qesa.o connector.o set2.o test-set2.o
 OBJECTS2 = config.o set.o qesa.o connector.o set2.o set2hat.o test-hat.o
-SLIBS = 
+SLIBS = -ljemalloc
 PROGRAM = set2
 
 all : set2 hat
