@@ -23,7 +23,9 @@
   set-trie.
 */
 int cnt_leafs = 0;
+int cnt_query = 0;
 int sum_leafpaths = 0;
+int sum_queryhits = 0;
 
 /*
   Create a new set-trie.
@@ -262,7 +264,8 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // equal to number of skipped elements in se.
       if (((*hmg) - set_tl_size(se)) >= 0) {
 
- 	 qesa_write(qp, (void *)(st->ndset));
+	 sum_queryhits++;
+	 //qesa_write(qp, (void *)(st->ndset));
       }
 
       // return if connector was not created
@@ -293,7 +296,8 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // check if tail in st is similar to the rest of se
       if (set_tl_similar_rev_hmg(st->sub.tail.set, se, hmg)) {
 
-	 qesa_write(qp, (void *)(st->sub.tail.set));
+	 sum_queryhits++;
+	 //qesa_write(qp, (void *)(st->sub.tail.set));
       }
 
       // restire hmg
@@ -481,7 +485,8 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
       int tmp_skp = (*skp) - set_tl_size(se);
       if (tmp_skp >= 0) {
 
-	 qesa_write(qp, (void *)set_copy(sp));
+	 sum_queryhits++;
+	 //qesa_write(qp, (void *)set_copy(sp));
 	 //set_print(stdout, sp);
 	 //fprintf(stdout, " ");
          //set_tl_print(stdout, se);
@@ -507,7 +512,8 @@ void set2_simsearch_lcs( set2_node *st, set *se, set *sp, int *skp, int *add, qe
       // check if tail in st is similar to the rest of se
       if (set_tl_similar_lcs(st->sub.tail.set, se, skp, add)) {
 
-	 qesa_write(qp, (void *)(st->sub.tail.set));
+	 sum_queryhits++;
+	 //qesa_write(qp, (void *)(st->sub.tail.set));
          // left for testing. should be the same as st->sub.tail
          //set_print(stdout, sp);
          //fprintf(stdout, " ");
@@ -706,13 +712,13 @@ void set2_avg_height( set2_node *st, set *s1 )
       //}
 
       // update statistics
-      cnt_leafs += 1;
+      cnt_leafs++;
       sum_leafpaths += set_size(s1);
       
-      set_print(stdout, s1);    
+      //set_print(stdout, s1);    
       //fprintf(f, " ");
       //set_tl_print(f, st->sub.tail.set);
-      fprintf(stdout, "\n");
+      //fprintf(stdout, "\n");
       return;
       
    } else {
@@ -724,11 +730,11 @@ void set2_avg_height( set2_node *st, set *s1 )
 	 if (st->isset) {
 
 	    // update statistics
-            cnt_leafs += 1;
+            cnt_leafs++;
             sum_leafpaths += set_size(s1);
 
-            set_print(stdout, s1);    
-            fprintf(stdout, "\n");
+            //set_print(stdout, s1);    
+            //fprintf(stdout, "\n");
 
          } else {
 

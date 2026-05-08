@@ -72,7 +72,8 @@ void apply_tests_to_strie_lcs( FILE *f, set2_node *st, int *add, int *skp ) {
       // reset set sp and simsearch params
       set_open(s1);
       set_reset(sp);
-      qesa_reset(q1);
+      sum_queryhits = 0;
+      //qesa_reset(q1);
       *add = d1;
       *skp = d2;
       
@@ -86,7 +87,8 @@ void apply_tests_to_strie_lcs( FILE *f, set2_node *st, int *add, int *skp ) {
       elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
       // print qesax
-      qesa_print(q1, stdout);
+      //qesa_print(q1, stdout);
+      printf("n %d\n", sum_queryhits);
 
       // print elapsed time
       printf("= %llu\n", (long long unsigned int) elap);
@@ -144,18 +146,21 @@ void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
 
       // print the query
       printf("? ");
-      set_print(stdout, s1);
-      printf("\n");
+      cnt_query++;
+      //set_print(stdout, s1);
+      //printf("\n");
+      printf("%d\n", cnt_query);
       
       // reset set sp and simsearch params
       set_open(s1);
       set_reset(sp);
-      qesa_reset(q1);
+      sum_queryhits = 0;
+      //qesa_reset(q1);
       *hmg = d1;
       
       // skip if length of s1 is smaller or eqal to hmg.
       //printf("s1=%d, hmg=%d\n", set_size(s1), d1);
-      //if (set_size(s1) <= *hmg) continue;
+      if (set_size(s1) <= *hmg) continue;
 
       // measure elapsed time
       clock_gettime(CLOCK_MONOTONIC, &start);
@@ -167,7 +172,8 @@ void apply_tests_to_strie_hmg( FILE *f, set2_node *st, int *hmg ) {
       elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
       // print qesax
-      qesa_print(q1, stdout);
+      //qesa_print(q1, stdout);
+      printf("n %d\n", sum_queryhits);
 
       // print elapsed time
       printf("= %llu\n", (long long unsigned int) elap);

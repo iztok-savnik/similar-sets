@@ -43,14 +43,16 @@ typedef struct set2_node {
    } sub;
    int min;   // min set that goes through this node 
    int max;   // max set that goes through this node
-   int cnt;   // number of sets in trie with a given prefix */	
+   int cnt;   // number of sets in trie with a given prefix 
 } set2_node;
 
 
 /*---------------------- Exported functions ------------------------------*/
 
 extern int cnt_leafs;
+extern int cnt_query;
 extern int sum_leafpaths;
+extern int sum_queryhits;
 
 extern set2_node* set2_alloc();
 extern void set2_free( set2_node *st );

@@ -145,8 +145,10 @@ void apply_tests_to_strie_hmg( FILE *f, set2_hat *sh, int *hmg ) {
 
       // print the query
       printf("? ");
-      set_print(stdout, s1);
-      printf("\n");
+      cnt_query++;
+      //set_print(stdout, s1);
+      //printf("\n");
+      printf("%d\n", cnt_query);
       
       // skip if length of se is smaller or eqal to hmg.
       //if (set_size(s1) < *hmg) continue;
@@ -154,9 +156,13 @@ void apply_tests_to_strie_hmg( FILE *f, set2_hat *sh, int *hmg ) {
       // reset set sp and simsearch params
       set_open(s1);
       set_reset(sp);
-      qesa_reset(q1);
+      sum_queryhits = 0;
+      //qesa_reset(q2);
       *hmg = d1;
-      
+     
+      // set sizes below hmg
+      if (set_size(s1) <= *hmg) continue;
+
       // measure elapsed time
       clock_gettime(CLOCK_MONOTONIC, &start);
 
@@ -167,7 +173,8 @@ void apply_tests_to_strie_hmg( FILE *f, set2_hat *sh, int *hmg ) {
       elap = 1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
 
       // print qesax
-      qesa_print(q1, stdout);
+      //qesa_print(q1, stdout);
+      printf("n %d\n", sum_queryhits);
 
       // print elapsed time
       printf("= %llu\n", (long long unsigned int) elap);
