@@ -42,7 +42,8 @@ qesa *qesa_alloc()
 boolean qesa_free(qesa *qp)
 {
    // dispose structures referenced in arr
-   for (int i = 0; i <=  qp->last; i++)
+   // updated 26/8/14: i <= qp->last
+   for (int i = 0; i < qp->length; i++)
       if (qp->arr[i] != NULL)
 	 free(qp->arr[i]);
 

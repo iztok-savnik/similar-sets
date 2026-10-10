@@ -6,16 +6,16 @@
 use BerkeleyDB;
 
 BEGIN {
-  system "rm *.db\n";
+  system "rm map.db\n";
 }
 
 # a map from alphabet elements to to newly created ids
-tie %map, 'BerkeleyDB::Btree',
+tie @freq, 'BerkeleyDB::Recno',
           -Cachesize => 3000000000,
           -Filename => "map.db",
           -Flags    => DB_CREATE;  # |DB_RDONLY;
 
-%map = ();
+@freq = ();
 
 sub test_gen_map_onfreq {
 

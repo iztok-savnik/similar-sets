@@ -264,8 +264,8 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // equal to number of skipped elements in se.
       if (((*hmg) - set_tl_size(se)) >= 0) {
 
-	 sum_queryhits++;
-	 //qesa_write(qp, (void *)(st->ndset));
+	 //sum_queryhits++;
+	 qesa_write(qp, (void *)(st->ndset));
       }
 
       // return if connector was not created
@@ -296,8 +296,8 @@ void set2_simsearch_hmg( set2_node *st, set *se, set *sp, int *hmg, qesa *qp )
       // check if tail in st is similar to the rest of se
       if (set_tl_similar_rev_hmg(st->sub.tail.set, se, hmg)) {
 
-	 sum_queryhits++;
-	 //qesa_write(qp, (void *)(st->sub.tail.set));
+	 //sum_queryhits++;
+	 qesa_write(qp, (void *)(st->sub.tail.set));
       }
 
       // restire hmg
